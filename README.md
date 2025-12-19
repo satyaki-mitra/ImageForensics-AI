@@ -1,4 +1,4 @@
-# AI Image Screener
+# ImageForensics-AI
 
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-009688.svg)](https://fastapi.tiangolo.com/)
@@ -11,7 +11,7 @@
 
 ## 🎯 Overview
 
-**AI Image Screener** is not a "perfect AI detector." It is a **pragmatic screening tool** designed to reduce manual review workload by flagging potentially AI-generated images based on statistical and physical anomalies.
+**ImageForensics-AI** is not a "perfect AI detector." It is a **pragmatic screening tool** designed to reduce manual review workload by flagging potentially AI-generated images based on statistical and physical anomalies.
 
 ### What This Is
 ✅ A workflow efficiency tool  
@@ -148,7 +148,7 @@ Image Upload → Validation → Parallel Metric Execution → Aggregation → Th
 ### Component Structure
 
 ```
-ai_image_screener/
+ImageForensics-AI/
 ├── app.py                          # FastAPI application entry point
 ├── config/
 │   ├── settings.py                 # Environment variables, weights, thresholds
@@ -222,8 +222,8 @@ ai_image_screener/
 
 ```bash
 # Clone repository
-git clone https://github.com/satyakimitra/ai-image-screener.git
-cd ai-image-screener
+git clone https://github.com/satyaki-mitra/ImageForensics-AI.git
+cd ImageForensics-AI
 
 # Create virtual environment
 python -m venv venv
@@ -423,10 +423,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 **Satyaki Mitra**  
 Data Scientist | AI-ML Practitioner
 
-- LinkedIn: [linkedin.com/in/satyaki-mitra](https://linkedin.com/in/satyaki-mitra)
-- GitHub: [@satyakimitra](https://github.com/satyakimitra)
-- Email: satyaki.mitra@example.com
-
 ---
 
 ## 🙏 Acknowledgments
@@ -438,23 +434,11 @@ Data Scientist | AI-ML Practitioner
 
 ---
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/satyaki-mitra/ai-image-screener/issues)
-- **Documentation**: [`docs/`](docs/)
-- **Email**: support@aiimagescreener.com
-
----
-
 ## 🔮 Roadmap
 
 - [ ] Add watermark detection module
 - [ ] Integrate reverse image search API
 - [ ] ML-based detector as optional metric
-- [ ] Persistent result storage (PostgreSQL)
-- [ ] Webhook callbacks for async processing
-- [ ] Docker containerization
-- [ ] Kubernetes deployment manifests
 
 ---
 
