@@ -1416,13 +1416,15 @@
                                     <th>Status</th>
                                     <th>Score</th>
                                     <th>Signals</th>
+                                    <th>Evidence</th>
                                     <th>Details</th>
+
                                 </tr>
                             </thead>
                             <tbody id="resultsTableBody">
                                 <!-- Results will be populated here -->
                                 <tr id="noResultsRow">
-                                    <td colspan="5" class="text-center" style="padding: 3rem; color: var(--text-light);">
+                                    <td colspan="6" class="text-center" style="padding: 3rem; color: var(--text-light);">
                                         <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
                                         <p>No analysis results yet. Upload images and click "Start Analysis" to begin.</p>
                                     </td>
@@ -1914,6 +1916,32 @@
             }, 1000);
         }
         
+        function summarizeEvidence(evidence = []) {
+            const summary = {
+                AI: 0,
+                AUTHENTIC: 0,
+                INDETERMINATE: 0
+            };
+
+            evidence.forEach(ev => {
+                switch ((ev.direction || '').toLowerCase()) {
+                    case 'ai_generated':
+                        summary.AI++;
+                        break;
+
+                    case 'authentic':
+                        summary.AUTHENTIC++;
+                        break;
+
+                    case 'indeterminate':
+                        summary.INDETERMINATE++;
+                        break;
+                }
+            });
+
+            return summary;
+        }
+
         function decisionMeta(decision) {
             const normalized = (decision || '').toUpperCase();
 
@@ -1984,6 +2012,8 @@
                 const confidence = resultData.confidence || 0;
                 const imageSize = resultData.image_size || [0, 0];
                 const signals = resultData.signals || [];
+                const evidence = resultData.evidence || [];
+                const evidenceSummary = summarizeEvidence(evidence);
                 const processingTime = resultData.processing_time || 0;
                 
                 const scorePercent = Math.round(overallScore * 100);
@@ -2029,6 +2059,27 @@
                             ${warningCount > 0 ? `<span class="signal-badge signal-warning" style="font-size: 0.7rem;">${warningCount} warning</span>` : ''}
                             ${signals.length - flaggedCount - warningCount > 0 ? 
                             `<span class="signal-badge signal-passed" style="font-size: 0.7rem;">${signals.length - flaggedCount - warningCount} passed</span>` : ''}
+                        </div>
+                    </td>
+                    <td style="min-width: 160px;">
+                        <div style="display:flex;gap:0.25rem;flex-wrap:wrap;">
+                            ${evidenceSummary.AI > 0 
+                                ? `<span class="signal-badge signal-flagged" style="font-size:0.7rem;">
+                                    ${evidenceSummary.AI} AI
+                                </span>` 
+                                : ''}
+
+                            ${evidenceSummary.AUTHENTIC > 0 
+                                ? `<span class="signal-badge signal-passed" style="font-size:0.7rem;">
+                                    ${evidenceSummary.AUTHENTIC} authentic
+                                </span>` 
+                                : ''}
+
+                            ${evidenceSummary.INDETERMINATE > 0 
+                                ? `<span class="signal-badge signal-warning" style="font-size:0.7rem;">
+                                    ${evidenceSummary.INDETERMINATE} indeterminate
+                                </span>` 
+                                : ''}
                         </div>
                     </td>
                     <td>
