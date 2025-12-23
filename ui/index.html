@@ -1915,7 +1915,9 @@
         }
         
         function decisionMeta(decision) {
-            switch (decision) {
+            const normalized = (decision || '').toUpperCase();
+
+            switch (normalized) {
                 case 'MOSTLY_AUTHENTIC':
                     return {
                         label: 'Mostly Authentic',
@@ -1925,14 +1927,14 @@
 
                 case 'AUTHENTIC_BUT_REVIEW':
                     return {
-                        label: 'Authentic (Review Suggested)',
+                        label: 'Authentic But Review',
                         badgeClass: 'status-review',
                         recommendation: 'Optional human review'
                     };
 
                 case 'SUSPICIOUS_AI_LIKELY':
                     return {
-                        label: 'Suspicious (AI Likely)',
+                        label: 'Suspicious AI Likely',
                         badgeClass: 'status-review',
                         recommendation: 'Manual verification recommended'
                     };
@@ -1947,10 +1949,10 @@
                 default:
                     console.warn('Unknown decision:', decision);
                     return {
-                    label: decision,
-                    badgeClass: 'status-review',
-                    recommendation: 'Manual review required'
-                };
+                        label: humanizeDecision(decision || 'UNKNOWN'),
+                        badgeClass: 'status-review',
+                        recommendation: 'Manual review required'
+                    };
             }
         }
 
