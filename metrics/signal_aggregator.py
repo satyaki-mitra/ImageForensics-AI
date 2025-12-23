@@ -1,4 +1,5 @@
 # Dependencies
+import os
 import time
 import numpy as np
 from typing import List
@@ -11,17 +12,21 @@ from config.constants import MetricType
 from config.constants import SignalStatus
 from config.schemas import AnalysisResult
 from config.schemas import DetectionSignal
+from concurrent.futures import as_completed
 from config.constants import DetectionStatus
 from config.constants import SIGNAL_THRESHOLDS
 from utils.image_processor import ImageProcessor
 from config.constants import METRIC_EXPLANATIONS
 from metrics.noise_analyzer import NoiseAnalyzer
 from metrics.color_analyzer import ColorAnalyzer
+from concurrent.futures import ThreadPoolExecutor
 from metrics.texture_analyzer import TextureAnalyzer
+from config.constants import SIGNAL_CONFIDENCE_PARAMS
 from features.threshold_manager import ThresholdManager
 from config.constants import IMAGE_RESIZE_MAX_DIMENSION
 from metrics.frequency_analyzer import FrequencyAnalyzer
 from metrics.gradient_field_pca import GradientFieldPCADetector
+
 
 # Suppress NumPy warning 
 np.seterr(divide  = 'ignore', 
@@ -33,12 +38,12 @@ np.seterr(divide  = 'ignore',
 logger = get_logger(__name__)
 
 
-class MetricsAggregator:
+class SignalAggregator:
     """
-    Main detector that orchestrates all detection methods
+    Main detector that orchestrates all detection signals
 
-    Combines multiple unsupervised metrics:
-    ----------------------------------------
+    Combines multiple unsupervised metric signals:
+    ----------------------------------------------
     1. Gradient-Field PCA
     2. Frequency Domain Analysis (FFT)
     3. Noise Pattern Analysis
@@ -73,6 +78,11 @@ class MetricsAggregator:
         
         # Get metric weights either from runtime UI or default to settings
         self.weights                    = (self.threshold_manager.get_metric_weights() if self.threshold_manager else settings.get_metric_weights())
+        
+        # Initialize shared ThreadPoolExecutor (CPU-safe)
+        max_workers                     = min(settings.METRIC_WORKERS or len(self.detector_registry), os.cpu_count() or 4)
+
+        self.executor                   = ThreadPoolExecutor(max_workers = max_workers)
         
         logger.info(f"Metric weights: {self.weights}")
 
@@ -117,6 +127,11 @@ class MetricsAggregator:
             
             # Determine status
             status          = self._determine_status(overall_score = overall_score)
+
+            # Calculate confidence 
+            confidence      = self._calculate_confidence(metric_results = metric_results,
+                                                         overall_score  = overall_score,
+                                                        )
             
             # Calculate processing time
             processing_time = time.time() - start_time
@@ -125,7 +140,7 @@ class MetricsAggregator:
             result          = AnalysisResult(filename        = filename,
                                              overall_score   = overall_score,
                                              status          = status,
-                                             confidence      = int(overall_score * 100),
+                                             confidence      = confidence,
                                              signals         = signals,
                                              metric_results  = metric_results,
                                              processing_time = processing_time,
@@ -154,18 +169,26 @@ class MetricsAggregator:
                   { dict }       : Dictionary mapping MetricType to MetricResult
         """
         metric_results = dict()
+        futures        = dict()
         
-        # Run eaach detector one by one
+        # Submit all detectors
         for metric_type, (detector_name, detector) in self.detector_registry.items():
+
+            futures[self.executor.submit(detector.detect, image = image)] = (metric_type, detector_name)
+        
+        # Collect results as they complete
+        for future in as_completed(futures):
+            metric_type, detector_name = futures[future]
+
             try:
-                result                      = detector.detect(image = image)
+                result                      = future.result(timeout = settings.METRIC_TIMEOUT)
                 result.metric_type          = metric_type
                 metric_results[metric_type] = result
                 
                 logger.debug(f"{detector_name} | {metric_type.value} | score={result.score:.3f} | confidence={result.confidence:.3f}")
-                
+
             except Exception as e:
-                logger.error(f"{detector.__class__.__name__} failed: {e}")
+                logger.error(f"{detector_name} failed: {e}")
 
                 # Same Failure Score by all metrics with same confidence 
                 metric_results[metric_type] = MetricResult(metric_type = metric_type,
@@ -286,3 +309,38 @@ class MetricsAggregator:
         
         else:
             return DetectionStatus.LIKELY_AUTHENTIC
+
+    
+    def _calculate_confidence(self, metric_results: dict[MetricType, MetricResult], overall_score: float) -> int:
+        """
+        Tier-1 confidence calculator based on:
+        - metric agreement
+        - metric reliability
+        - decision boundary distance
+        """
+        scores                 = [result.score for result in metric_results.values()]
+        score_variance         = np.var(scores)
+
+        # If all metrics failed, confidence must be low
+        if all(isinstance(result.details, dict) and "error" in result.details for result in metric_results.values()):
+            return int(SIGNAL_CONFIDENCE_PARAMS.MIN_CONFIDENCE * 100)
+
+        # Agreement confidence
+        agreement_confidence   = 1.0 - min(score_variance / SIGNAL_CONFIDENCE_PARAMS.VARIANCE_NORM, 1.0)
+
+        # Reliability confidence
+        confidences            = [result.confidence for result in metric_results.values() if result.confidence is not None]
+        reliability_confidence = float(np.mean(confidences)) if confidences else SIGNAL_CONFIDENCE_PARAMS.DEFAULT_RELIABILITY_CONFIDENCE
+
+        # Distance confidence
+        review_threshold       = (self.threshold_manager.get_review_threshold() if self.threshold_manager else settings.REVIEW_THRESHOLD)
+        distance_confidence    = min(abs(overall_score - review_threshold) / SIGNAL_CONFIDENCE_PARAMS.DISTANCE_NORM, 1.0)
+
+        logger.debug(f"Confidence breakdown | agreement={agreement_confidence:.2f}, reliability={reliability_confidence:.2f}, distance={distance_confidence:.2f}")
+
+        confidence             = (SIGNAL_CONFIDENCE_PARAMS.AGREEMENT_WEIGHT * agreement_confidence +
+                                  SIGNAL_CONFIDENCE_PARAMS.RELIABILITY_WEIGHT * reliability_confidence + 
+                                  SIGNAL_CONFIDENCE_PARAMS.DISTANCE_WEIGHT * distance_confidence
+                                 )
+
+        return int(np.clip(confidence, 0.0, 1.0) * 100)

@@ -110,34 +110,38 @@ class ColorAnalyzer:
         --------
             { np.ndarray }     : HSV image (H in [0, 360], S and V in [0, 1])
         """
-        r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+        r, g, b         = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
         
-        maxc    = np.maximum(np.maximum(r, g), b)
-        minc    = np.minimum(np.minimum(r, g), b)
-        delta   = maxc - minc
+        maxc            = np.maximum(np.maximum(r, g), b)
+        minc            = np.minimum(np.minimum(r, g), b)
+        delta           = maxc - minc
         
         # Value
-        v       = maxc
+        v               = maxc
         
         # Saturation
-        s       = np.where(maxc != 0, delta / maxc, 0)
+        s               = np.zeros_like(maxc, dtype = np.float32)
+
+        nonzero_mask    = maxc > 0
+        s[nonzero_mask] = delta[nonzero_mask] / maxc[nonzero_mask]
         
         # Hue
-        h       = np.zeros_like(maxc)
+        h               = np.zeros_like(maxc)
         
         # Red is max
-        mask    = (maxc == r) & (delta != 0)
-        h[mask] = 60 * (((g[mask] - b[mask]) / delta[mask]) % 6)
+        mask            = (maxc == r) & (delta > 0)
+        h[mask]         = 60.0 * (((g[mask] - b[mask]) / delta[mask]) % 6.0)
         
         # Green is max
-        mask    = (maxc == g) & (delta != 0)
-        h[mask] = 60 * (((b[mask] - r[mask]) / delta[mask]) + 2)
+        mask            = (maxc == g) & (delta > 0)
+        h[mask]         = 60.0 * (((b[mask] - r[mask]) / delta[mask]) + 2)
         
         # Blue is max
-        mask    = (maxc == b) & (delta != 0)
-        h[mask] = 60 * (((r[mask] - g[mask]) / delta[mask]) + 4)
+        mask            = (maxc == b) & (delta > 0)
+        h[mask]         = 60.0 * (((r[mask] - g[mask]) / delta[mask]) + 4)
         
-        hsv     = np.stack([h, s, v], axis = 2)
+        hsv             = np.stack([h, s, v], axis = 2)
+        hsv             = np.nan_to_num(hsv, nan = 0.0, posinf = 0.0, neginf = 0.0)
         
         return hsv
 

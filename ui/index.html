@@ -657,6 +657,12 @@
             border: 1px solid rgba(214, 158, 46, 0.3);
         }
 
+        .status-danger {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(229, 62, 62, 0.3);
+        }
+
         .score-indicator {
             display: flex;
             align-items: center;
@@ -1039,13 +1045,29 @@
                         <h3>Multi-Signal Detection</h3>
                         <p>Five independent statistical detectors with weighted ensemble aggregation</p>
                     </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <h3>Evidence Analysis</h3>
+                        <p>Aggregates detection signals and metadata into structured evidence, resolving conflicts and supporting explainable, non-scoring decisions</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <h3>Decision Policy</h3>
+                        <p>Applies deterministic rules over metrics and evidence to produce a review-aware final verdict, prioritizing safety and auditability</p>
+                    </div>
                     
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-file-export"></i>
                         </div>
                         <h3>Comprehensive Reports</h3>
-                        <p>Export results in CSV, JSON, and PDF formats for integration and documentation</p>
+                        <p>Export results in CSV and JSON formats for integration and documentation</p>
                     </div>
                     
                     <div class="feature-card">
@@ -1215,6 +1237,72 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, #2b6cb0 0%, #63b3ed 100%);">
+                                <i class="fas fa-camera-retro"></i>
+                            </div>
+                            <div>
+                                <div class="metric-title">EXIF Analyzer</div>
+                            </div>
+                            <span class="metric-weight">Auxiliary Metric</span>
+                        </div>
+                    
+                        <p class="metric-description">
+                            Analyzes image metadata for presence, completeness, and plausibility.
+                            Real camera images usually contain coherent EXIF data, while AI-generated
+                            images often lack metadata or contain inconsistent fields.
+                        </p>
+                    
+                        <div class="metric-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Detection Method</span>
+                                <span class="detail-value">Metadata consistency analysis</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Signals</span>
+                                <span class="detail-value">Missing, stripped, or malformed EXIF</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Sensitivity</span>
+                                <span class="detail-value">Medium</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, #6b46c1 0%, #b794f4 100%);">
+                                <i class="fas fa-fingerprint"></i>
+                            </div>
+                            <div>
+                                <div class="metric-title">Watermark Analyzer</div>
+                            </div>
+                            <span class="metric-weight">Auxiliary Metric</span>
+                        </div>
+                    
+                        <p class="metric-description">
+                            Detects known and statistical watermark patterns embedded by generative
+                            models. Includes checks for frequency-domain artifacts and spatial
+                            regularities associated with AI watermarking techniques.
+                        </p>
+                    
+                        <div class="metric-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Detection Method</span>
+                                <span class="detail-value">Pattern & frequency-domain analysis</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Signals</span>
+                                <span class="detail-value">Model-specific watermark artifacts</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Sensitivity</span>
+                                <span class="detail-value">Low–Medium (model-dependent)</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1305,9 +1393,6 @@
                             <button class="action-button secondary-action" id="exportCsvBtn">
                                 <i class="fas fa-file-csv"></i> CSV
                             </button>
-                            <button class="action-button secondary-action" id="exportPdfBtn">
-                                <i class="fas fa-file-pdf"></i> PDF
-                            </button>
                             <button class="action-button secondary-action" id="exportJsonBtn">
                                 <i class="fas fa-file-code"></i> JSON
                             </button>
@@ -1385,8 +1470,7 @@
         const HEALTH_ENDPOINT = '/health';
         const BATCH_PROGRESS_ENDPOINT = '/batch';
         const CSV_REPORT_ENDPOINT = '/report/csv';
-        const PDF_REPORT_ENDPOINT = '/report/pdf';
-        
+
         // Global state
         let files = [];
         let fileDataUrls = {};
@@ -1419,7 +1503,6 @@
         const resultsTableBody = document.getElementById('resultsTableBody');
         const noResultsRow = document.getElementById('noResultsRow');
         const exportCsvBtn = document.getElementById('exportCsvBtn');
-        const exportPdfBtn = document.getElementById('exportPdfBtn');
         const exportJsonBtn = document.getElementById('exportJsonBtn');
         const toggleDetailedAnalysis = document.getElementById('toggleDetailedAnalysis');
         const detailedAnalysisIcon = document.getElementById('detailedAnalysisIcon');
@@ -1498,7 +1581,6 @@
             
             // Export
             exportCsvBtn.addEventListener('click', exportCsv);
-            exportPdfBtn.addEventListener('click', exportPdf);
             exportJsonBtn.addEventListener('click', exportJson);
             
             // Detailed analysis toggle
@@ -1832,6 +1914,46 @@
             }, 1000);
         }
         
+        function decisionMeta(decision) {
+            switch (decision) {
+                case 'MOSTLY_AUTHENTIC':
+                    return {
+                        label: 'Mostly Authentic',
+                        badgeClass: 'status-authentic',
+                        recommendation: 'No immediate action required'
+                    };
+
+                case 'AUTHENTIC_BUT_REVIEW':
+                    return {
+                        label: 'Authentic (Review Suggested)',
+                        badgeClass: 'status-review',
+                        recommendation: 'Optional human review'
+                    };
+
+                case 'SUSPICIOUS_AI_LIKELY':
+                    return {
+                        label: 'Suspicious (AI Likely)',
+                        badgeClass: 'status-review',
+                        recommendation: 'Manual verification recommended'
+                    };
+
+                case 'CONFIRMED_AI_GENERATED':
+                    return {
+                        label: 'Confirmed AI Generated',
+                        badgeClass: 'status-danger',
+                        recommendation: 'Block or audit required'
+                    };
+
+                default:
+                    console.warn('Unknown decision:', decision);
+                    return {
+                    label: decision,
+                    badgeClass: 'status-review',
+                    recommendation: 'Manual review required'
+                };
+            }
+        }
+
         function displayResults() {
             if (!batchResults) {
                 console.error('No results to display:', batchResults);
@@ -1855,7 +1977,8 @@
                 
                 const filename = resultData.filename || 'Unknown';
                 const overallScore = resultData.overall_score || 0;
-                const status = resultData.status || 'LIKELY_AUTHENTIC';
+                const decision = resultData.final_decision;
+                const meta = decisionMeta(decision);
                 const confidence = resultData.confidence || 0;
                 const imageSize = resultData.image_size || [0, 0];
                 const signals = resultData.signals || [];
@@ -1863,20 +1986,12 @@
                 
                 const scorePercent = Math.round(overallScore * 100);
                 let scoreClass = 'score-low';
-                let scoreWidth = '30%';
-                if (scorePercent >= 70) {
-                    scoreClass = 'score-high';
-                    scoreWidth = '90%';
-                } else if (scorePercent >= 50) {
-                    scoreClass = 'score-medium';
-                    scoreWidth = '60%';
-                }
+                if (scorePercent >= 70) scoreClass = 'score-high';
+                else if (scorePercent >= 50) scoreClass = 'score-medium';
+                const scoreWidth = `${Math.min(scorePercent, 100)}%`;
                 
                 const flaggedCount = signals.filter(s => s.status === 'flagged').length;
                 const warningCount = signals.filter(s => s.status === 'warning').length;
-                
-                // Format status for display (remove underscores)
-                const displayStatus = status.replace(/_/g, ' ');
                 
                 // Get thumbnail
                 const thumbnailSrc = fileDataUrls[filename] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="%23f0f0f0"/></svg>';
@@ -1894,8 +2009,8 @@
                         </div>
                     </td>
                     <td>
-                        <span class="status-badge ${status === 'LIKELY_AUTHENTIC' ? 'status-authentic' : 'status-review'}" style="white-space: nowrap;">
-                            ${displayStatus}
+                        <span class="status-badge ${meta.badgeClass}">
+                            ${meta.label}
                         </span>
                     </td>
                     <td>
@@ -1945,153 +2060,190 @@
         }
         
         function updateSummary(batchResult) {
-            const total = batchResult.total_images || 0;
-            const processed = batchResult.processed || batchResult.results?.length || 0;
-            const failed = batchResult.failed || 0;
-            
-            let likelyAuthentic = 0;
-            let reviewRequired = 0;
-            
-            if (batchResult.results) {
-                batchResult.results.forEach(result => {
-                    const resultData = result;
-                    const status = resultData.status || 'LIKELY_AUTHENTIC';
-                    if (status === 'LIKELY_AUTHENTIC') {
-                        likelyAuthentic++;
-                    } else if (status === 'REVIEW_REQUIRED') {
-                        reviewRequired++;
-                    }
-                });
+            if (!batchResult || !Array.isArray(batchResult.results)) {
+                resultsSummary.innerHTML = '';
+                return;
             }
-            
-            resultsSummary.innerHTML = `
-                <div class="summary-card">
-                    <div class="summary-value">${processed}</div>
-                    <div class="summary-label">Total Processed</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-value">${likelyAuthentic}</div>
-                    <div class="summary-label">Likely Authentic</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-value">${reviewRequired}</div>
-                    <div class="summary-label">Review Required</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-value">${failed}</div>
-                    <div class="summary-label">Failed</div>
-                </div>
-            `;
+
+            // Count decisions exactly as returned by backend
+            const counts = {};
+            batchResult.results.forEach(result => {
+                const status = result.final_decision;
+                if (!status) return;
+
+                counts[status] = (counts[status] || 0) + 1;
+            });
+
+            // Stable, policy-aligned display order
+            const ORDER = [
+                'CONFIRMED_AI_GENERATED',
+                'SUSPICIOUS_AI_LIKELY',
+                'AUTHENTIC_BUT_REVIEW',
+                'MOSTLY_AUTHENTIC'
+            ];
+
+            resultsSummary.innerHTML = ORDER
+                .filter(status => counts[status])
+                .map(status => {
+                    const meta = decisionMeta(status);
+
+                    return `
+                        <div class="summary-card">
+                            <div class="summary-value">${counts[status]}</div>
+                            <div class="summary-label">${meta.label}</div>
+                        </div>
+                    `;
+                })
+                .join('');
         }
-        
+
         function showDetailedAnalysis(index) {
             if (!batchResults || !batchResults.results || !batchResults.results[index]) return;
-            
+
             selectedImageIndex = index;
-            const result = batchResults.results[index];
-            const resultData = result;
-            
-            const filename = resultData.filename || 'Unknown';
-            const overallScore = resultData.overall_score || 0;
-            const status = resultData.status || 'LIKELY_AUTHENTIC';
-            const confidence = resultData.confidence || 0;
-            const imageSize = resultData.image_size || [0, 0];
-            const processingTime = resultData.processing_time || 0;
-            const signals = resultData.signals || [];
-            
-            const scorePercent = Math.round(overallScore * 100);
-            const displayStatus = status.replace(/_/g, ' ');
-            
-            // Ensure detailed analysis is expanded
+            const result          = batchResults.results[index];
+
+            const filename        = result.filename || 'Unknown';
+            const overallScore    = result.overall_score || 0;
+            const decision        = result.final_decision;
+            const meta            = decisionMeta(decision);
+            const confidence      = result.confidence != null ? Math.round(result.confidence) : 0;
+            const imageSize       = result.image_size || [0, 0];
+            const processingTime  = result.processing_time || 0;
+            const signals         = result.signals || [];
+            const evidence        = result.evidence || [];
+
+            const scorePercent    = Math.round(overallScore * 100);
+
+            /* ---------- Expand panel ---------- */
             detailedAnalysisContent.classList.add('show');
             detailedAnalysisIcon.classList.remove('fa-chevron-down');
             detailedAnalysisIcon.classList.add('fa-chevron-up');
-            
-            document.getElementById('detailedAnalysisContent').scrollIntoView({ 
+
+            detailedAnalysisContent.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
             });
-            
-            // Build signals HTML
+
+            /* ---------- Signals (Tier-1 Metrics) ---------- */
             let signalsHtml = '';
-            if (signals && signals.length > 0) {
+
+            if (signals.length > 0) {
                 signals.forEach(signal => {
                     let statusClass = 'signal-passed';
                     if (signal.status === 'warning') statusClass = 'signal-warning';
                     if (signal.status === 'flagged') statusClass = 'signal-flagged';
-                    
+
                     const signalScore = Math.round((signal.score || 0) * 100);
-                    
+
                     signalsHtml += `
                         <div class="signal-card">
                             <div class="signal-header">
                                 <strong>${signal.name || 'Unknown Metric'}</strong>
                                 <span class="signal-badge ${statusClass}">${signal.status}</span>
                             </div>
-                            <p style="font-size: 0.875rem; margin-bottom: 0.5rem; color: var(--text-light);">
+                            <p style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.5rem;">
                                 ${signal.explanation || 'No explanation available.'}
                             </p>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div style="font-size: 0.75rem; color: var(--text-light);">
-                                    Score: ${signalScore}%
-                                </div>
+                            <div style="font-size:0.75rem;color:var(--text-light);">
+                                Score: ${signalScore}%
                             </div>
                         </div>
                     `;
                 });
             } else {
-                signalsHtml = '<p class="text-center" style="color: var(--text-light);">No detection signals available.</p>';
+                signalsHtml = `
+                    <p class="text-center" style="color:var(--text-light);">
+                        No detection signals available.
+                    </p>
+                `;
             }
-            
+
+            /* ---------- Evidence (Tier-2 Declarative Evidence) ---------- */
+            let evidenceHtml = '';
+
+            if (evidence.length > 0) {
+                evidence.forEach(ev => {
+                    let badgeClass = 'signal-passed';
+                    if (ev.direction === 'AI_GENERATED') badgeClass = 'signal-flagged';
+                    if (ev.direction === 'INDETERMINATE') badgeClass = 'signal-warning';
+
+                    evidenceHtml += `
+                        <div class="signal-card" style="background:#f1f5f9;">
+                            <div class="signal-header">
+                                <strong>${ev.source.toUpperCase()}</strong>
+                                <span class="signal-badge ${badgeClass}">
+                                    ${ev.strength}
+                                </span>
+                            </div>
+                            <p style="font-size:0.875rem;margin-bottom:0.5rem;">
+                                ${ev.finding}
+                            </p>
+                            <div style="font-size:0.75rem;color:#64748b;">
+                                Analyzer: ${ev.analyzer}
+                                ${ev.confidence != null ? ` • Confidence: ${Math.round(ev.confidence * 100)}%` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                evidenceHtml = `
+                    <p class="text-center" style="color:var(--text-light);">
+                        No declarative evidence detected.
+                    </p>
+                `;
+            }
+
+            /* ---------- Render ---------- */
             detailedAnalysisContent.innerHTML = `
-                <div style="margin-bottom: 1.5rem;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                        <img src="${fileDataUrls[filename] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><rect width="60" height="60" fill="%23f0f0f0"/></svg>'}" 
-                             alt="${filename}" 
-                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem; border: 1px solid var(--border);">
+                <div style="margin-bottom:1.5rem;">
+                    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                        <img src="${fileDataUrls[filename] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="%23f0f0f0"/></svg>'}"
+                            alt="${filename}"
+                            style="width:60px;height:60px;object-fit:cover;border-radius:0.5rem;border:1px solid var(--border);">
                         <div>
-                            <h4 style="margin-bottom: 0.25rem;">${filename}</h4>
-                            <div style="font-size: 0.875rem; color: var(--text-light);">
+                            <h4 style="margin-bottom:0.25rem;">${filename}</h4>
+                            <div style="font-size:0.875rem;color:var(--text-light);">
                                 ${imageSize[0]} × ${imageSize[1]} • ${processingTime.toFixed(2)}s
                             </div>
                         </div>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                        <div style="text-align: center; padding: 1rem; background-color: #f8fafc; border-radius: 0.5rem;">
-                            <div style="font-size: 1.5rem; font-weight: 700; color: ${scorePercent >= 70 ? '#e53e3e' : scorePercent >= 50 ? '#d69e2e' : '#38a169'};">${scorePercent}%</div>
-                            <div style="font-size: 0.875rem; color: var(--text-light);">Score</div>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                        <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:0.5rem;">
+                            <div style="font-size:1.5rem;font-weight:700;">${scorePercent}%</div>
+                            <div style="font-size:0.875rem;color:var(--text-light);">Score</div>
                         </div>
-                        <div style="text-align: center; padding: 1rem; background-color: #f8fafc; border-radius: 0.5rem;">
-                            <div style="font-size: 1.5rem; font-weight: 700; color: ${displayStatus.includes('REVIEW') ? '#d69e2e' : '#38a169'};">${displayStatus}</div>
-                            <div style="font-size: 0.875rem; color: var(--text-light);">Verdict</div>
+                        <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:0.5rem;">
+                            <div style="font-size:1.25rem;font-weight:700;">${meta.label}</div>
+                            <div style="font-size:0.875rem;color:var(--text-light);">Verdict</div>
                         </div>
-                        <div style="text-align: center; padding: 1rem; background-color: #f8fafc; border-radius: 0.5rem;">
-                            <div style="font-size: 1.5rem; font-weight: 700;">${confidence}%</div>
-                            <div style="font-size: 0.875rem; color: var(--text-light);">Confidence</div>
+                        <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:0.5rem;">
+                            <div style="font-size:1.5rem;font-weight:700;">${confidence}%</div>
+                            <div style="font-size:0.875rem;color:var(--text-light);">Confidence</div>
                         </div>
                     </div>
                 </div>
-                
-                <h4 style="margin-bottom: 1rem;">Detection Signals</h4>
+
+                <h4 style="margin-bottom:0.75rem;">Detection Signals</h4>
                 <div class="signal-grid">
                     ${signalsHtml}
                 </div>
-                
-                <div class="signal-card" style="margin-top: 1.5rem; background-color: ${displayStatus.includes('REVIEW') ? 'rgba(214, 158, 46, 0.1)' : 'rgba(56, 161, 105, 0.1)'}; border-color: ${displayStatus.includes('REVIEW') ? 'rgba(214, 158, 46, 0.3)' : 'rgba(56, 161, 105, 0.3)'};">
+
+                <h4 style="margin:1.5rem 0 0.75rem;">Evidence</h4>
+                <div class="signal-grid">
+                    ${evidenceHtml}
+                </div>
+
+                <div class="signal-card" style="margin-top:1.5rem;">
                     <div class="signal-header">
-                        <strong>Recommendation</strong>
+                        <strong>Decision Explanation</strong>
                     </div>
-                    <p style="margin-bottom: 0.5rem;">
-                        ${displayStatus.includes('REVIEW') ? 'Manual verification recommended' : 'No immediate action required'}
-                    </p>
-                    <div style="font-size: 0.875rem; color: var(--text-light);">
-                        Confidence: ${confidence}% likelihood of ${displayStatus.includes('REVIEW') ? 'AI generation' : 'authenticity'}
-                    </div>
+                    <p>${result.decision_explanation || meta.recommendation}</p>
                 </div>
             `;
         }
-        
+
         // Export functions
         async function exportCsv() {
             if (!currentBatchId) {
@@ -2129,42 +2281,6 @@
             }
         }
 
-        async function exportPdf() {
-            if (!currentBatchId) {
-                showToast('No analysis results to export.', 'warning');
-                return;
-            }
-            
-            showLoading(true);
-            try {
-                // Using GET request since backend now accepts both GET and POST
-                const response = await fetch(`${PDF_REPORT_ENDPOINT}/${currentBatchId}`);
-                
-                if (response.ok) {
-                    // Get the blob data
-                    const blob = await response.blob();
-                    
-                    // Create download link
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = URL.createObjectURL(blob);
-                    downloadLink.download = `ai_screener_report_${currentBatchId}.pdf`;
-                    
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                    
-                    showToast('PDF report downloaded successfully.', 'success');
-                } else {
-                    showToast('Failed to generate PDF report.', 'error');
-                }
-            } catch (error) {
-                console.error('PDF export failed:', error);
-                showToast('PDF export failed. Please try again.', 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-
         async function exportJson() {
             if (!batchResults) {
                 showToast('No analysis results to export.', 'warning');
@@ -2192,7 +2308,7 @@
                 showLoading(false);
             }
         }
-        
+
         // Reset functions
         function resetUI() {
             analyzeBtn.disabled = false;

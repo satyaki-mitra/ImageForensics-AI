@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 class DetectionStatus(str, Enum):
     """
-    Overall detection status
+    Binary status derived from ensemble score only: FinalDecision supersedes this once decision policy is applied
     """
     LIKELY_AUTHENTIC = "LIKELY_AUTHENTIC"
     REVIEW_REQUIRED  = "REVIEW_REQUIRED"
@@ -40,6 +40,37 @@ class MetricType(str, Enum):
     TEXTURE   = "texture"
     COLOR     = "color"
 
+
+class EvidenceType(str, Enum):
+    EXIF       = "exif"
+    WATERMARK  = "watermark"
+
+
+
+class EvidenceStrength(str, Enum):
+    """
+    Ordered by increasing certainty: WEAK < MODERATE < STRONG < CONCLUSIVE
+    """
+    WEAK        = "weak"        # heuristic, non-binding
+    MODERATE    = "moderate"    # strong hint, not cryptographic
+    STRONG      = "strong"      # vendor watermark, strong signal
+    CONCLUSIVE  = "conclusive"  # cryptographic / signed proof
+
+
+class EvidenceDirection(str, Enum):
+    """
+    What this evidence supports
+    """
+    AI_GENERATED  = "ai_generated"
+    AUTHENTIC     = "authentic"
+    INDETERMINATE = "indeterminate"
+
+
+class FinalDecision(str, Enum):
+    MOSTLY_AUTHENTIC       = "mostly_authentic"
+    AUTHENTIC_BUT_REVIEW   = "authentic_but_review"
+    SUSPICIOUS_AI_LIKELY   = "suspicious_ai_likely"
+    CONFIRMED_AI_GENERATED = "confirmed_ai_generated"
 
 
 # Signal thresholds
@@ -314,6 +345,79 @@ class ColorAnalysisParams:
                               )
 
 
+@dataclass(frozen = True)
+class SignalConfidenceParams:
+    """
+    Parameters for Tier-1 signal confidence calculation
+    """
+    # Agreement (variance-based confidence)
+    VARIANCE_NORM                  : float = 0.10
+
+    # Distance-from-threshold confidence
+    DISTANCE_NORM                  : float = 0.30
+
+    # Fallback when metric confidence is missing
+    DEFAULT_RELIABILITY_CONFIDENCE : float = 0.60
+
+    # Weighting of confidence components (must sum to 1.0)
+    AGREEMENT_WEIGHT               : float = 0.40
+    RELIABILITY_WEIGHT             : float = 0.30
+    DISTANCE_WEIGHT                : float = 0.30
+
+
+@dataclass(frozen = True)
+class WatermarkAnalysisParams:
+    """
+    Parameters for heuristic watermark detection
+    """
+    # Confidence thresholds
+    STRONG_CONFIDENCE_THRESHOLD : float = 0.85
+    CONFIDENCE_CAP              : float = 0.95
+
+    # Wavelet-domain thresholds
+    HF_ENERGY_RATIO_THRESHOLD   : float = 0.18
+    KURTOSIS_THRESHOLD          : float = 7.5
+    PERIODICITY_THRESHOLD       : float = 0.8
+
+    HF_ENERGY_RATIO_NORM        : float = 0.4
+    KURTOSIS_NORM_FACTOR        : float = 15.0
+    PEAK_STD_MULTIPLIER         : float = 3.0
+
+    # Frequency-domain thresholds
+    MIN_ANOMALOUS_BANDS         : int   = 2
+    SPECTRAL_SYMMETRY_THRESHOLD : float = 0.6
+    PEAK_RATIO_THRESHOLD        : float = 0.05
+
+    # LSB steganography thresholds
+    LSB_ENTROPY_THRESHOLD       : float = 0.72
+    CHI_SQUARE_THRESHOLD        : float = 20.0
+    RUNS_SCORE_THRESHOLD        : float = 0.6
+    LSB_ENTROPY_NORM_BASE       : float = 0.5
+    LSB_ENTROPY_NORM_RANGE      : float = 0.5
+    CHI_SQUARE_NORM_FACTOR      : float = 50.0
+
+
+@dataclass(frozen = True)
+class ExifAnalysisParams:
+    """
+    Parameters for EXIF metadata analysis
+    """
+    # Confidence values
+    MISSING_EXIF_CONFIDENCE            : float = 0.5
+    AI_FINGERPRINT_CONFIDENCE          : float = 0.9
+    CAMERA_BASE_CONFIDENCE             : float = 0.7
+    CAMERA_WITH_LENS_CONFIDENCE        : float = 0.75
+    SUSPICIOUS_CAMERA_CONFIDENCE       : float = 0.4
+    TIMESTAMP_INCONSISTENCY_CONFIDENCE : float = 0.4
+    MISSING_PHOTO_METADATA_CONFIDENCE  : float = 0.5
+    SUSPICIOUS_TIMESTAMP_CONFIDENCE    : float = 0.3
+
+    # Thresholds
+    TIMESTAMP_DELTA_THRESHOLD          : float = 5.0    # seconds
+    MIN_VALID_YEAR                     : int   = 1990   # before digital cameras
+    MAX_FUTURE_YEARS                   : int   = 1      # how many years in future is valid
+
+
 
 # Singleton instances for parameter classes
 GRADIENT_FIELD_PCA_PARAMS = GradientFieldPCAParams()
@@ -321,5 +425,19 @@ FREQUENCY_ANALYSIS_PARAMS = FrequencyAnalysisParams()
 NOISE_ANALYSIS_PARAMS     = NoiseAnalysisParams()
 TEXTURE_ANALYSIS_PARAMS   = TextureAnalysisParams()
 COLOR_ANALYSIS_PARAMS     = ColorAnalysisParams()
+SIGNAL_CONFIDENCE_PARAMS  = SignalConfidenceParams()
 
 
+# Singleton instances for evidence analysis classes
+WATERMARK_ANALYSIS_PARAMS = WatermarkAnalysisParams()
+EXIF_ANALYSIS_PARAMS      = ExifAnalysisParams()
+
+
+# Evidence Strength ordering
+EVIDENCE_STRENGTH_ORDER   = {EvidenceStrength.WEAK       : 1,
+                             EvidenceStrength.MODERATE   : 2,
+                             EvidenceStrength.STRONG     : 3,
+                             EvidenceStrength.CONCLUSIVE : 4,
+                            }
+
+MIN_EVIDENCE_CONFIDENCE   = 0.6

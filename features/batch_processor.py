@@ -1,20 +1,25 @@
 # Dependencies
 import time
+from typing import Any
 from typing import List
 from typing import Dict
 from typing import Tuple
 from pathlib import Path
 from typing import Callable
+from collections import Counter
 from utils.logger import get_logger
 from config.settings import settings
 from config.schemas import AnalysisResult
+from config.constants import FinalDecision
 from concurrent.futures import TimeoutError
 from concurrent.futures import as_completed
 from config.constants import DetectionStatus
 from config.schemas import BatchAnalysisResult
-from metrics.aggregator import MetricsAggregator
 from concurrent.futures import ThreadPoolExecutor
+from metrics.signal_aggregator import SignalAggregator
 from features.threshold_manager import ThresholdManager
+from decision_builders.decision_policy import DecisionPolicy
+from evidence_analyzers.evidence_aggregator import EvidenceAggregator
 
 
 # Setup Logging
@@ -37,18 +42,24 @@ class BatchProcessor:
         Initialize Batch Processor
         """
         # Instantiate threshold manager
-        self.threshold_manager = threshold_manager
+        self.threshold_manager   = threshold_manager
 
-        # Initialize aggregator
-        self.aggregator        = MetricsAggregator(threshold_manager = threshold_manager)
+        # Initialize signal aggregators
+        self.aggregator          = SignalAggregator(threshold_manager = threshold_manager)
+        
+        # Initialize evidence-based aggregator
+        self.evidence_aggregator = EvidenceAggregator()
+
+        # Initialize decision-policy engine
+        self.decision_policy     = DecisionPolicy()
             
         # Fix number of workers 
-        self.max_workers       = settings.MAX_WORKERS if settings.PARALLEL_PROCESSING else 1
+        self.max_workers         = settings.MAX_WORKERS if settings.PARALLEL_PROCESSING else 1
         
         logger.info(f"BatchProcessor initialized with max_workers={self.max_workers}, parallel={settings.PARALLEL_PROCESSING}")
     
 
-    def process_batch(self, image_files: List[Dict[str, any]], on_progress: Callable[[int, int, str], None] | None = None) -> BatchAnalysisResult:
+    def process_batch(self, image_files: List[Dict[str, Any]], on_progress: Callable[[int, int, str], None] | None = None) -> BatchAnalysisResult:
         """
         Process multiple images with automatic parallel/sequential switching
         
@@ -231,17 +242,26 @@ class BatchProcessor:
             { AnalysisResult }   : Analysis result or None on error
         """
         try:
-            return self.aggregator.analyze_image(image_path = image_path,
-                                                 filename   = filename,
-                                                 image_size = image_size,
-                                                )
+            # Tier-1 Signal 
+            analysis              = self.aggregator.analyze_image(image_path = image_path,
+                                                                  filename   = filename,
+                                                                  image_size = image_size,
+                                                                 )
+
+            # Tier-2 evidence
+            analysis.evidence     = self.evidence_aggregator.analyze(image_path = image_path)
+
+            # Final decision
+            final_analysis_result = self.decision_policy.apply(analysis = analysis)
+
+            return final_analysis_result
         
         except Exception as e:
             logger.error(f"Failed to process {filename}: {e}", exc_info = True)
             return None
     
 
-    def _calculate_summary(self, results: List[AnalysisResult], total: int) -> Dict[str, int]:
+    def _calculate_summary(self, results: List[AnalysisResult], total: int) -> Dict[str, Any]:
         """
         Calculate summary statistics from results
         
@@ -256,28 +276,38 @@ class BatchProcessor:
             { dict }         : Summary statistics
         """
         # Calculate processing stats
-        likely_authentic = sum(1 for r in results if (r.status == DetectionStatus.LIKELY_AUTHENTIC))
-        review_required  = sum(1 for r in results if (r.status == DetectionStatus.REVIEW_REQUIRED))
+        processed             = len(results)
+        failed                = total - processed
+        success_rate          = int((processed / total * 100) if total > 0 else 0)
 
-        processed        = len(results)
-        failed           = total - processed
-        success_rate     = int((processed / total * 100) if (total > 0) else 0)
-        
+        # Count final decisions safely
+        decision_counts       = Counter(result.final_decision.value for result in results)
+
         # Calculate average scores
-        avg_score        = sum(r.overall_score for r in results) / len(results) if results else 0.0
-        avg_confidence   = sum(r.confidence for r in results) / len(results) if results else 0
-        avg_proc_time    = sum(r.processing_time for r in results) / len(results) if results else 0.0
+        avg_score             = sum(r.overall_score for r in results) / processed if results else 0.0
+        avg_confidence        = sum(r.confidence for r in results) / processed if results else 0
+        avg_proc_time         = sum(r.processing_time for r in results) / processed if results else 0.0
         
-        return {"likely_authentic" : likely_authentic,
-                "review_required"  : review_required,
-                "success_rate"     : success_rate,
-                "processed"        : processed,
-                "failed"           : failed,
-                "avg_score"        : round(avg_score, 3),
-                "avg_confidence"   : int(avg_confidence),
-                "avg_proc_time"    : round(avg_proc_time, 2),
-               }
-    
+        # Final decision distribution
+        decision_distribution = {FinalDecision.CONFIRMED_AI_GENERATED.value : decision_counts.get(FinalDecision.CONFIRMED_AI_GENERATED.value, 0),
+                                 FinalDecision.SUSPICIOUS_AI_LIKELY.value   : decision_counts.get(FinalDecision.SUSPICIOUS_AI_LIKELY.value, 0),
+                                 FinalDecision.AUTHENTIC_BUT_REVIEW.value   : decision_counts.get(FinalDecision.AUTHENTIC_BUT_REVIEW.value, 0),
+                                 FinalDecision.MOSTLY_AUTHENTIC.value       : decision_counts.get(FinalDecision.MOSTLY_AUTHENTIC.value, 0),
+                                }
+
+        summary               = {"processed"      : processed,
+                                 "failed"         : failed,
+                                 "success_rate"   : success_rate,
+                                 "avg_score"      : round(avg_score, 3),
+                                 "avg_confidence" : int(avg_confidence),
+                                 "avg_proc_time"  : round(avg_proc_time, 2),
+                                }
+
+        # Update summary dictb with decision_distriubution dict
+        summary.update(decision_distribution)
+
+        return summary
+
 
     def _create_empty_batch_result(self) -> BatchAnalysisResult:
         """
@@ -291,9 +321,11 @@ class BatchProcessor:
                                    processed             = 0,
                                    failed                = 0,
                                    results               = [],
-                                   summary               = {"likely_authentic" : 0,
-                                                            "review_required"  : 0,
-                                                            "success_rate"     : 0,
+                                   summary               = {FinalDecision.CONFIRMED_AI_GENERATED.value : 0,
+                                                            FinalDecision.SUSPICIOUS_AI_LIKELY.value   : 0,
+                                                            FinalDecision.AUTHENTIC_BUT_REVIEW.value   : 0,
+                                                            FinalDecision.MOSTLY_AUTHENTIC.value       : 0,
+                                                            "success_rate"                             : 0,
                                                            },
                                    total_processing_time = 0.0,
                                   )

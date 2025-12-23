@@ -8,7 +8,6 @@ from typing import List
 from typing import Dict
 from pathlib import Path
 from fastapi import File
-from typing import Optional
 from fastapi import Request
 from fastapi import FastAPI
 from fastapi import UploadFile
@@ -24,7 +23,6 @@ from utils.validators import ImageValidator
 from fastapi.staticfiles import StaticFiles
 from utils.helpers import generate_unique_id
 from reporter.csv_reporter import CSVReporter
-from reporter.pdf_reporter import PDFReporter
 from config.schemas import BatchAnalysisResult
 from reporter.json_reporter import JSONReporter
 from utils.image_processor import ImageProcessor
@@ -63,12 +61,10 @@ image_validator   = ImageValidator()
 image_processor   = ImageProcessor()
 
 threshold_manager = ThresholdManager()
-threshold_manager = threshold_manager
 batch_processor   = BatchProcessor(threshold_manager = threshold_manager)
 
 json_reporter     = JSONReporter()
 csv_reporter      = CSVReporter()
-pdf_reporter      = PDFReporter()
 
 UPLOAD_DIR        = settings.UPLOAD_DIR
 CACHE_DIR         = settings.CACHE_DIR
@@ -157,21 +153,21 @@ async def analyze_single_image(file: UploadFile = File(...)):
     image_id   = generate_unique_id()
     image_path = UPLOAD_DIR / f"{image_id}_{file.filename}"
 
-    image_validator.validate_image(file_path = image_path,
-                                   filename  = file.filename,
-                                   file_size = file.size,
-                                  )
-
     try:
         with open(image_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
+
+        image_validator.validate_image(file_path = image_path,
+                                       filename  = file.filename,
+                                       file_size = file.size,
+                                      )
 
         image                  = image_processor.load_image(image_path)
 
         # image is a NumPy array → shape = (H, W, C) or (H, W)
         height, width          = image.shape[:2]
 
-        result: AnalysisResult = batch_processor.process_single(image      = image_path,
+        result: AnalysisResult = batch_processor.process_single(image_path = image_path,
                                                                 filename   = file.filename,
                                                                 image_size = (width, height),
                                                                )
@@ -210,14 +206,14 @@ async def analyze_batch(files: List[UploadFile] = File(...)):
 
             with open(path, "wb") as f:
                 shutil.copyfileobj(file.file, f)
-            
-            image         = image_processor.load_image(path)
-            height, width = image.shape[:2]
 
             image_validator.validate_image(file_path = path,
                                            filename  = file.filename,
                                            file_size = file.size,
                                           )
+
+            image         = image_processor.load_image(path)
+            height, width = image.shape[:2]
 
             image_entries.append({"path"     : path,
                                   "filename" : file.filename,
@@ -297,6 +293,8 @@ def export_csv(batch_id: str):
     
     # Clean up the file after sending
     path.unlink(missing_ok = True)
+    SESSION_STORE.pop(batch_id, None)
+
     
     return Response(content    = content,
                     media_type = "text/csv",
@@ -304,33 +302,6 @@ def export_csv(batch_id: str):
                                   "Content-Type"        : "text/csv"
                                  }
                    )
-
-
-@app.api_route("/report/pdf/{batch_id}", methods = ["GET", "POST"])
-def export_pdf(batch_id: str):
-    session = SESSION_STORE.get(batch_id)
-
-    if (not session or ("result" not in session)):
-        raise HTTPException(status_code = 404, 
-                            detail      = "Batch result not found",
-                           )
-
-    path = pdf_reporter.export_batch(session["result"])
-    
-    # Read the file and send it as a download
-    with open(path, "rb") as f:
-        content = f.read()
-    
-    # Clean up the file after sending
-    path.unlink(missing_ok = True)
-    
-    return Response(content    = content,
-                    media_type = "application/pdf",
-                    headers    = {"Content-Disposition" : f"attachment; filename=ai_screener_report_{batch_id}.pdf",
-                                  "Content-Type"        : "application/pdf"
-                                 }
-                   )
-
 
 
 # ==================== MAIN ====================

@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     PROCESSING_TIMEOUT  : int      = 30
     PARALLEL_PROCESSING : bool     = True
     MAX_WORKERS         : int      = 4
+    METRIC_WORKERS      : int      = 4
+    EVIDENCE_WORKERS    : int      = 2
+    METRIC_TIMEOUT      : float    = 5.0
+    EVIDENCE_TIMEOUT    : float    = 5.0
     
     # Paths
     BASE_DIR            : Path     = Path(__file__).parent.parent
