@@ -204,9 +204,8 @@ For each color channel $C \in \{R, G, B\}$:
 
 2. **Construct gradient matrix**:
    
-   ```math
-   $$M = \begin{bmatrix} \text{vec}(G_x) & \text{vec}(G_y) \end{bmatrix}^T$$
-   ```
+   $$M = \begin{bmatrix} \text{vec}(G_x) \ & \text{vec}(G_y) \end{bmatrix}^T$$
+
    
 3. **Perform PCA**:
    
