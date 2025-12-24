@@ -1,5 +1,5 @@
 # =========================================
-# AI Image Screener - Requirements
+# ImageForensics-AI - Requirements
 # Python 3.11+
 # =========================================
 

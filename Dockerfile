@@ -1,5 +1,5 @@
 # ===============================================================
-# ImageScreenAI - Dockerfile : Optimized for Hugging Face Spaces
+# ImageForensics-AI - Dockerfile : Optimized for Hugging Face Spaces
 # ===============================================================
 
 FROM python:3.11-slim
