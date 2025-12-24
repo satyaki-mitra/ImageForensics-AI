@@ -36,14 +36,17 @@ license: mit
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [Architecture Overview](#-architecture-overview)
+- [Documentation](#-documentation)
+- [Technical Details](#-technical-details)
+- [API Documentation](#-api-documentation)
+- [System Architecture](#️-system-architecture)
+- [Detection Approach](#-detection-approach)
+- [Decision Policy Rules](#-decision-policy-rules)
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
-- [Documentation](#-documentation)
-- [Technical Details](#technical-details)
-- [API Documentation](#api-documentation)
-- [System Architecture](#-system-architecture)
-- [Performance & Accuracy](#performance--accuracy)
-- [Ethical Considerations & Limitations](#-ethical-considerations--limitations)
+- [Configuration](#️-configuration)
+- [Performance & Accuracy](#-performance--accuracy)
+- [Ethical Considerations & Limitations](#️-ethical-considerations--limitations)
 - [License](#-license)
 
 ---
@@ -481,6 +484,7 @@ else:
 
 - pip
 
+
 ### Setup
 
 ```bash
@@ -659,7 +663,6 @@ Data Scientist | AI-ML Practitioner
 ---
 
 ## 🔗 Resources
-
 
 - 📖 **API Documentation** - Complete API reference, endpoints, request/response formats
 - 🔬 **Technical Documentation** - Algorithms, mathematical formulations, implementation details  
