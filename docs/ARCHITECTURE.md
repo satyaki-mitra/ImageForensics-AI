@@ -33,85 +33,6 @@ AI Image Screener is a multi-tier screening system designed for first-pass scree
 ```mermaid
 graph TB
     subgraph "Frontend Layer"
-        UI[Web UI<br/>Single Page HTML]
-    end
-    
-    subgraph "API Layer"
-        API[FastAPI Server<br/>app.py]
-        CORS[CORS Middleware]
-        ERROR[Global Error Handler]
-    end
-    
-    subgraph "Processing Layer"
-        VALIDATOR[Image Validator<br/>utils/validators.py]
-        BATCH[Batch Processor<br/>features/batch_processor.py]
-    end
-    
-    subgraph "Detection Layer — Tier 1"
-        AGG[Signal Aggregator<br/>metrics/signal_aggregator.py]
-        
-        subgraph "Independent Metrics"
-            M1[Gradient PCA]
-            M2[Frequency FFT]
-            M3[Noise Pattern]
-            M4[Texture Stats]
-            M5[Color Distribution]
-        end
-    end
-    
-    subgraph "Evidence Layer — Tier 2 (non-scoring)"
-        EVIDENCE_AGG[Evidence Aggregator (Tier-2)<br/>evidence_analyzers/]
-        EXIF[EXIF Analyzer]
-        WM[Watermark Analyzer]
-    end
-    
-    subgraph "Decision Layer"
-        POLICY[Decision Policy Engine<br/>decision_policy.py]
-        DETAIL[Decision Explanation Engine]
-    end
-    
-    subgraph "Reporting Layer"
-        CSV[CSV Reporter]
-        JSON[JSON Reporter]
-    end
-    
-    subgraph "Storage Layer"
-        UPLOAD[(Temp Uploads)]
-        CACHE[(Processing Cache)]
-        REPORTS[(Reports)]
-    end
-    
-    UI --> API
-    API --> VALIDATOR
-    VALIDATOR --> BATCH
-    API --> ERROR
-    
-    BATCH --> AGG
-    AGG --> M1 & M2 & M3 & M4 & M5
-    M1 & M2 & M3 & M4 & M5 --> AGG
-    
-    BATCH --> EVIDENCE_AGG
-    EVIDENCE_AGG --> EXIF & WM
-    
-    AGG --> POLICY
-    EVIDENCE_AGG --> DETAIL
-    EVIDENCE_AGG --> POLICY
-    
-    POLICY --> DETAIL
-    DETAIL --> CSV & JSON
-    
-    API -.-> UPLOAD
-    BATCH -.-> CACHE
-    CSV & JSON -.-> REPORTS
-```
-
----
-
-## Data Pipeline
-
-```mermaid
-graph TB
-    subgraph "Frontend Layer"
         UI["Web UI<br/>Single Page HTML"]
     end
     
@@ -182,6 +103,60 @@ graph TB
     API -.-> UPLOAD
     BATCH -.-> CACHE
     CSV & JSON -.-> REPORTS
+```
+
+---
+
+## Data Pipeline
+
+```mermaid
+flowchart LR
+    subgraph "Input"
+        A[Image Upload] --> B{Validation}
+        B -->|Pass| C[Temp Storage]
+        B -->|Fail| X[Error Response]
+    end
+    
+    subgraph "Preprocessing"
+        C --> D[Load Image]
+        D --> E[Resize / Normalize]
+        E --> F[Luminance Conversion]
+    end
+    
+    subgraph "Tier 1 — Statistical Metrics"
+        F --> G1[Gradient Analysis]
+        F --> G2[Frequency Analysis]
+        F --> G3[Noise Analysis]
+        F --> G4[Texture Analysis]
+        F --> G5[Color Analysis]
+    end
+    
+    subgraph "Metric Aggregation"
+        G1 & G2 & G3 & G4 & G5 --> H[Weighted Ensemble]
+        H --> I[Overall Score<br/>0.0 – 1.0]
+        I --> J[Detection Status]
+    end
+    
+    subgraph "Tier 2 — Declarative Evidence"
+        C --> K1[EXIF Analysis]
+        C --> K2[Watermark Analysis]
+        K1 & K2 --> L[Evidence Results]
+    end
+    
+    subgraph "Decision Policy"
+        J --> M[Rule-Based Engine]
+        L --> M
+        M --> V1[Mostly Authentic]
+        M --> V2[Authentic But Review]
+        M --> V3[Suspicious AI Likely]
+        M --> V4[Confirmed AI Generated]
+    end
+    
+    subgraph "Output"
+        M --> N[Detailed Result Assembly]
+        N --> O[Explainability]
+        O --> P[CSV / JSON Export]
+    end
 ```
 
 ---
