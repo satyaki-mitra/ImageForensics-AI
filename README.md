@@ -203,8 +203,8 @@ For each color channel $C \in \{R, G, B\}$:
    where $S_x, S_y$ are Sobel operators
 
 2. **Construct gradient matrix**:
-   
-   $$M = \begin{bmatrix} \text{vec}(G_x) \ & \text{vec}(G_y) \end{bmatrix}^T$$
+
+   $$M = \left[ \begin{array}{cc} \text{vec}(G_x) & \text{vec}(G_y) \end{array} \right]^T$$
 
    
 3. **Perform PCA**:
