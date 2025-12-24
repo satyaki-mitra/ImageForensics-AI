@@ -197,9 +197,9 @@ For those interested in the underlying algorithms and implementation:
 For each color channel $C \in \{R, G, B\}$:
 
 1. **Compute Sobel gradients**:
-   ```math
+   
    $$G_x = S_x * C, \quad G_y = S_y * C$$
-   ```
+   
 
    where $S_x, S_y$ are Sobel operators
 
