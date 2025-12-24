@@ -14,13 +14,14 @@
         }
 
         :root {
-            --primary: #2d3748;
-            --primary-light: #4a5568;
-            --primary-dark: #1a202c;
+            --primary: #1a365d;
+            --primary-light: #2d3748;
+            --primary-dark: #0f172a;
             --secondary: #718096;
-            --accent: #38a169;
-            --accent-light: #68d391;
-            --accent-dark: #2f855a;
+            --accent: #3182ce;
+            --accent-light: #63b3ed;
+            --accent-dark: #2c5282;
+            --success: #38a169;
             --warning: #d69e2e;
             --danger: #e53e3e;
             --background: #f7fafc;
@@ -30,6 +31,9 @@
             --text-light: #718096;
             --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius: 0.75rem;
+            --radius-lg: 1rem;
         }
 
         body {
@@ -43,17 +47,30 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 10px;
+            padding: 10px 20px;
         }
 
         /* Header */
         header {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #2d3748 100%);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
             color: white;
             padding: 1.5rem 0;
-            margin-bottom: 1rem;
-            border-radius: 0 0 1rem 1rem;
-            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: translate(30%, -30%);
         }
 
         .header-content {
@@ -62,6 +79,8 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .logo {
@@ -71,42 +90,67 @@
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
         }
 
         .logo-text h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
         }
 
         .logo-text .tagline {
             font-size: 0.875rem;
-            opacity: 0.8;
+            opacity: 0.9;
             margin-top: 0.125rem;
+            font-weight: 400;
         }
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-            border-radius: 1rem;
-            padding: 1.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
             color: white;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
 
         .hero h2 {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
-            color: white;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .hero-subtitle {
@@ -116,18 +160,22 @@
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
+            font-weight: 300;
         }
 
         .performance-badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
             padding: 0.75rem 1.5rem;
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 2rem;
             font-size: 0.875rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             backdrop-filter: blur(10px);
+            font-weight: 500;
         }
 
         .cta-button {
@@ -144,26 +192,25 @@
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
-            box-shadow: 0 4px 6px rgba(56, 161, 105, 0.2);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
             min-width: 200px;
             margin: 0 auto;
+            letter-spacing: 0.025em;
         }
 
         .cta-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(56, 161, 105, 0.3);
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.4);
         }
 
         /* Tab Navigation */
         .tabs {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.25rem;
             margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0;
             background-color: white;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
+            border-radius: var(--radius);
+            padding: 0.25rem;
             box-shadow: var(--shadow);
         }
 
@@ -171,7 +218,6 @@
             padding: 1rem 2rem;
             background: none;
             border: none;
-            border-bottom: 3px solid transparent;
             color: var(--text-light);
             font-weight: 600;
             cursor: pointer;
@@ -179,13 +225,14 @@
             position: relative;
             flex: 1;
             text-align: center;
-            border-radius: 0.25rem;
+            border-radius: calc(var(--radius) - 0.25rem);
+            letter-spacing: 0.025em;
         }
 
         .tab-button.active {
             color: var(--accent);
-            border-bottom-color: var(--accent);
-            background-color: rgba(56, 161, 105, 0.05);
+            background-color: rgba(49, 130, 206, 0.08);
+            box-shadow: var(--shadow);
         }
 
         .tab-button:hover:not(.active) {
@@ -207,25 +254,46 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Features Grid */
+        /* Features Grid - 5 cards in one row */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.25rem;
             margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .feature-card {
             background-color: white;
-            border-radius: 1rem;
+            border-radius: var(--radius);
             padding: 1.5rem;
             border: 1px solid var(--border);
             transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-xl);
             border-color: var(--accent-light);
         }
 
@@ -233,25 +301,118 @@
             font-size: 2rem;
             color: var(--accent);
             margin-bottom: 1rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(49, 130, 206, 0.1) 0%, rgba(99, 179, 237, 0.1) 100%);
+            border-radius: 12px;
         }
 
-        /* Metrics Grid - Updated for Detailed Cards */
-        .metrics-grid {
+        .feature-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        /* Metrics Tab - UPDATED with proper separation */
+        .metrics-section {
+            margin-bottom: 3rem;
+        }
+
+        .metrics-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .section-icon.evidence {
+            background: linear-gradient(135deg, #6b46c1 0%, #b794f4 100%);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            flex: 1;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        /* Signal Metrics Grid - 5 cards in one row */
+        .signal-metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 1200px) {
+            .signal-metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
-            .metrics-grid {
+            .signal-metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .signal-metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Evidence Metrics Grid - 2 cards side by side */
+        .evidence-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .evidence-metrics-grid {
                 grid-template-columns: 1fr;
             }
         }
 
         .metric-card {
             background-color: white;
-            border-radius: 1rem;
+            border-radius: var(--radius);
             padding: 1.5rem;
             border: 1px solid var(--border);
             transition: all 0.3s;
@@ -261,8 +422,16 @@
         }
 
         .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .metric-card.signal {
+            border-top: 4px solid var(--accent);
+        }
+
+        .metric-card.evidence {
+            border-top: 4px solid #6b46c1;
         }
 
         .metric-header {
@@ -284,29 +453,37 @@
             color: white;
             font-size: 1.5rem;
             flex-shrink: 0;
+            box-shadow: var(--shadow);
         }
 
         .metric-title {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 600;
             color: var(--primary);
+            flex-grow: 1;
         }
 
         .metric-weight {
-            display: inline-block;
             padding: 0.25rem 0.75rem;
-            background-color: rgba(56, 161, 105, 0.1);
+            background-color: rgba(49, 130, 206, 0.1);
             color: var(--accent);
             border-radius: 2rem;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .metric-weight.evidence {
+            background-color: rgba(107, 70, 193, 0.1);
+            color: #6b46c1;
         }
 
         .metric-description {
             color: var(--text-light);
             margin-bottom: 1rem;
-            line-height: 1.6;
+            line-height: 1.5;
+            font-size: 0.875rem;
+            flex-grow: 1;
         }
 
         .metric-details {
@@ -319,7 +496,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.5rem;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
         }
 
         .detail-label {
@@ -334,16 +511,22 @@
         /* How-to-use Steps */
         .steps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
             margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .step-card {
             text-align: center;
             padding: 2rem;
             background-color: white;
-            border-radius: 1rem;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
             transition: all 0.3s;
         }
@@ -351,6 +534,7 @@
         .step-card:hover {
             transform: translateY(-5px);
             border-color: var(--accent);
+            box-shadow: var(--shadow-lg);
         }
 
         .step-number {
@@ -365,16 +549,17 @@
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 1rem;
+            box-shadow: var(--shadow);
         }
 
         /* Cards */
         .card {
             background-color: var(--card-bg);
-            border-radius: 1rem;
-            font-size: 1.00rem;
+            border-radius: var(--radius);
+            font-size: 1rem;
             box-shadow: var(--shadow);
-            padding: 1.0rem;
-            margin-bottom: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             border: 1px solid var(--border);
         }
 
@@ -382,9 +567,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 0.5px solid var(--border);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
         }
 
         .card-title {
@@ -393,36 +578,60 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            color: var(--primary);
         }
 
         /* Upload Section */
         .upload-area {
             border: 2px dashed var(--border);
-            border-radius: 1rem;
+            border-radius: var(--radius);
             padding: 3rem 1.5rem;
             text-align: center;
             transition: all 0.3s ease;
             cursor: pointer;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             background-color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(49, 130, 206, 0.02) 100%);
+            pointer-events: none;
         }
 
         .upload-area:hover, .upload-area.dragover {
             border-color: var(--accent);
-            background-color: rgba(56, 161, 105, 0.05);
+            background-color: rgba(49, 130, 206, 0.05);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         .upload-icon {
-            font-size: 3rem;
+            font-size: 3.5rem;
             color: var(--accent);
             margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .upload-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
         }
 
         .upload-button {
             background-color: var(--accent);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.875rem 1.75rem;
             border-radius: 0.5rem;
             font-weight: 600;
             cursor: pointer;
@@ -431,11 +640,14 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow);
         }
 
         .upload-button:hover {
             background-color: var(--accent-dark);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         /* Thumbnail Grid */
@@ -447,6 +659,9 @@
             max-height: 300px;
             overflow-y: auto;
             padding: 0.5rem;
+            border-radius: var(--radius);
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
         }
 
         .thumbnail-item {
@@ -456,11 +671,13 @@
             border: 2px solid var(--border);
             transition: all 0.3s;
             height: 120px;
+            background-color: white;
         }
 
         .thumbnail-item:hover {
             border-color: var(--accent);
             transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .thumbnail-img {
@@ -474,7 +691,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
             padding: 0.5rem;
             color: white;
             font-size: 0.75rem;
@@ -484,7 +701,7 @@
         }
 
         .remove-thumbnail {
-            background: rgba(229, 62, 62, 0.8);
+            background: rgba(229, 62, 62, 0.9);
             border: none;
             color: white;
             width: 24px;
@@ -495,6 +712,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
+            flex-shrink: 0;
         }
 
         .remove-thumbnail:hover {
@@ -502,7 +720,7 @@
             transform: scale(1.1);
         }
 
-        /* Start Analysis Button - Centered */
+        /* Start Analysis Button */
         .start-analysis-btn {
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
             color: white;
@@ -519,12 +737,13 @@
             gap: 0.75rem;
             width: 100%;
             margin-top: 1.5rem;
-            box-shadow: 0 4px 6px rgba(56, 161, 105, 0.2);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+            letter-spacing: 0.025em;
         }
 
         .start-analysis-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(56, 161, 105, 0.3);
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.4);
         }
 
         .start-analysis-btn:disabled {
@@ -542,10 +761,10 @@
 
         /* Progress Section */
         .progress-container {
-            margin-top: 1rem;
-            padding: 1rem;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
             background-color: white;
-            border-radius: 0.5rem;
+            border-radius: var(--radius);
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
@@ -553,7 +772,8 @@
         .progress-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
+            align-items: center;
+            margin-bottom: 1rem;
         }
 
         .progress-bar {
@@ -561,7 +781,7 @@
             background-color: var(--border);
             border-radius: 1rem;
             overflow: hidden;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .progress-fill {
@@ -570,109 +790,204 @@
             border-radius: 1rem;
             width: 0%;
             transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Results Section */
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 100px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+
+        /* Results Section - UPDATED FOR NO SCROLLING */
         .results-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .results-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .results-summary {
+                grid-template-columns: 1fr;
+            }
         }
 
         .summary-card {
             text-align: center;
             padding: 1.5rem;
-            border-radius: 1rem;
+            border-radius: var(--radius);
             background-color: white;
             border: 1px solid var(--border);
-            transition: transform 0.3s;
+            transition: all 0.3s;
         }
 
         .summary-card:hover {
             transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
         }
 
         .summary-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .summary-label {
             font-size: 0.875rem;
+            font-weight: 500;
             color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
+        /* FIXED RESULTS TABLE - NO HORIZONTAL SCROLLING */
         .results-table-container {
             overflow-x: auto;
             margin-top: 1.5rem;
-            border-radius: 0.5rem;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
             background-color: white;
+            box-shadow: var(--shadow);
         }
 
         .results-table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 0;
         }
 
         .results-table th {
             background-color: #f8fafc;
-            color: var(--text);
-            padding: 1rem;
+            color: var(--primary);
+            padding: 0.75rem 0.5rem;
             text-align: left;
             font-weight: 600;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
         }
 
         .results-table td {
-            padding: 1rem;
+            padding: 0.75rem 0.5rem;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
+            font-size: 0.875rem;
         }
 
         .results-table tr:hover {
             background-color: #f8fafc;
         }
 
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Fixed column widths for no scrolling */
+        .results-table th:nth-child(1),
+        .results-table td:nth-child(1) {
+            width: 180px;
+            min-width: 180px;
+            max-width: 180px;
+        }
+
+        .results-table th:nth-child(2),
+        .results-table td:nth-child(2) {
+            width: 140px;
+            min-width: 140px;
+            max-width: 140px;
+        }
+
+        .results-table th:nth-child(3),
+        .results-table td:nth-child(3) {
+            width: 150px;
+            min-width: 150px;
+            max-width: 150px;
+        }
+
+        .results-table th:nth-child(4),
+        .results-table td:nth-child(4) {
+            width: 120px;
+            min-width: 120px;
+            max-width: 120px;
+        }
+
+        .results-table th:nth-child(5),
+        .results-table td:nth-child(5) {
+            width: 120px;
+            min-width: 120px;
+            max-width: 120px;
+        }
+
+        .results-table th:nth-child(6),
+        .results-table td:nth-child(6) {
+            width: 80px;
+            min-width: 80px;
+            max-width: 80px;
+            text-align: center;
+        }
+
         .status-badge {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
+            padding: 0.25rem 0.5rem;
             border-radius: 2rem;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
+            letter-spacing: 0.025em;
             white-space: nowrap;
         }
 
         .status-authentic {
             background-color: rgba(56, 161, 105, 0.1);
-            color: var(--accent);
-            border: 1px solid rgba(56, 161, 105, 0.3);
+            color: var(--success);
+            border: 1px solid rgba(56, 161, 105, 0.2);
         }
 
         .status-review {
             background-color: rgba(214, 158, 46, 0.1);
             color: var(--warning);
-            border: 1px solid rgba(214, 158, 46, 0.3);
+            border: 1px solid rgba(214, 158, 46, 0.2);
         }
 
         .status-danger {
             background-color: rgba(229, 62, 62, 0.1);
             color: var(--danger);
-            border: 1px solid rgba(229, 62, 62, 0.3);
+            border: 1px solid rgba(229, 62, 62, 0.2);
         }
 
         .score-indicator {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            min-width: 150px;
+            min-width: 120px;
         }
 
         .score-bar {
             flex: 1;
-            height: 0.5rem;
+            height: 0.375rem;
             background-color: var(--border);
             border-radius: 1rem;
             overflow: hidden;
@@ -685,7 +1000,7 @@
         }
 
         .score-low {
-            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            background: linear-gradient(90deg, var(--success), #68d391);
         }
 
         .score-medium {
@@ -696,20 +1011,122 @@
             background: linear-gradient(90deg, var(--danger), #fc8181);
         }
 
+        /* Compact badges */
+        .signals-badges,
+        .evidence-badges {
+            display: flex;
+            gap: 0.125rem;
+            flex-wrap: wrap;
+        }
+
+        .signal-badge {
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.375rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            border: 1px solid;
+            white-space: nowrap;
+            letter-spacing: 0.025em;
+        }
+
+        .signal-passed {
+            background-color: rgba(56, 161, 105, 0.1);
+            color: var(--success);
+            border-color: rgba(56, 161, 105, 0.2);
+        }
+
+        .signal-warning {
+            background-color: rgba(214, 158, 46, 0.1);
+            color: var(--warning);
+            border-color: rgba(214, 158, 46, 0.2);
+        }
+
+        .signal-flagged {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: var(--danger);
+            border-color: rgba(229, 62, 62, 0.2);
+        }
+
+        .evidence-badge {
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.375rem;
+            font-size: 0.65rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .evidence-ai {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(229, 62, 62, 0.2);
+        }
+
+        .evidence-authentic {
+            background-color: rgba(56, 161, 105, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(56, 161, 105, 0.2);
+        }
+
+        .evidence-indeterminate {
+            background-color: rgba(214, 158, 46, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(214, 158, 46, 0.2);
+        }
+
+        /* Responsive adjustments for table */
+        @media (max-width: 1024px) {
+            .results-table th,
+            .results-table td {
+                padding: 0.5rem 0.375rem;
+                font-size: 0.75rem;
+            }
+            
+            .results-table th:nth-child(1),
+            .results-table td:nth-child(1) {
+                width: 160px;
+                min-width: 160px;
+                max-width: 160px;
+            }
+            
+            .results-table th:nth-child(2),
+            .results-table td:nth-child(2) {
+                width: 120px;
+                min-width: 120px;
+                max-width: 120px;
+            }
+            
+            .status-badge {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* On smaller screens, switch to vertical scrolling but keep it minimal */
+            .results-table-container {
+                overflow-x: auto;
+            }
+            
+            .results-table {
+                min-width: 700px;
+            }
+        }
+
         /* Detailed Analysis */
         .detailed-analysis {
             margin-top: 2rem;
             padding: 1.5rem;
             background-color: white;
-            border-radius: 1rem;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
         .analysis-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0;
             cursor: pointer;
             padding: 0.5rem;
             border-radius: 0.5rem;
@@ -722,8 +1139,7 @@
 
         .analysis-content {
             display: none;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
             animation: fadeIn 0.5s ease;
         }
 
@@ -743,46 +1159,18 @@
             border-radius: 0.5rem;
             border: 1px solid var(--border);
             background-color: #f8fafc;
+            transition: all 0.3s;
         }
 
-        .signal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
+        .signal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
-        .signal-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            border: 1px solid;
-            white-space: nowrap;
-        }
-
-        .signal-passed {
-            background-color: rgba(56, 161, 105, 0.1);
-            color: var(--accent);
-            border-color: rgba(56, 161, 105, 0.3);
-        }
-
-        .signal-warning {
-            background-color: rgba(214, 158, 46, 0.1);
-            color: var(--warning);
-            border-color: rgba(214, 158, 46, 0.3);
-        }
-
-        .signal-flagged {
-            background-color: rgba(229, 62, 62, 0.1);
-            color: var(--danger);
-            border-color: rgba(229, 62, 62, 0.3);
-        }
-
-        /* Footer - Reduced spacing */
+        /* Footer */
         footer {
-            margin-top: 0.1rem;
-            padding-top: 0.1rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
             border-top: 1px solid var(--border);
             color: var(--text-light);
             font-size: 0.875rem;
@@ -802,6 +1190,7 @@
             text-decoration: none;
             transition: color 0.3s;
             font-size: 0.875rem;
+            font-weight: 500;
         }
 
         .footer-link:hover {
@@ -814,7 +1203,7 @@
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
@@ -822,25 +1211,32 @@
             justify-content: center;
             gap: 0.5rem;
             font-size: 0.875rem;
+            letter-spacing: 0.025em;
         }
 
         .primary-action {
             background-color: var(--accent);
             color: white;
+            box-shadow: var(--shadow);
         }
 
         .primary-action:hover {
             background-color: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         .secondary-action {
             background-color: white;
             color: var(--accent);
             border: 1px solid var(--accent);
+            box-shadow: var(--shadow);
         }
 
         .secondary-action:hover {
-            background-color: rgba(56, 161, 105, 0.1);
+            background-color: rgba(49, 130, 206, 0.1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         /* Loading overlay */
@@ -850,14 +1246,16 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s;
+            backdrop-filter: blur(4px);
         }
 
         .loading-overlay.active {
@@ -872,6 +1270,13 @@
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         @keyframes spin {
@@ -886,13 +1291,16 @@
             padding: 1rem 1.5rem;
             background-color: white;
             color: var(--text);
-            border-radius: 0.5rem;
-            box-shadow: var(--shadow-lg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-xl);
             z-index: 1000;
             transform: translateX(100%);
             transition: transform 0.3s ease;
             max-width: 300px;
             border-left: 4px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
         .toast.show {
@@ -905,6 +1313,10 @@
 
         .toast.warning {
             border-left-color: var(--warning);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
         }
 
         /* Utility classes */
@@ -946,14 +1358,6 @@
                 text-align: center;
             }
             
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .signal-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .footer-links {
                 flex-direction: column;
                 gap: 0.75rem;
@@ -971,16 +1375,48 @@
             animation: spin 1s ease-in-out infinite;
             margin-right: 0.5rem;
         }
+
+        /* Enhanced image preview in detailed view */
+        .image-preview {
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Info pills */
+        .info-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #f8fafc;
+            color: var(--text-light);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Processing...</div>
     </div>
 
     <!-- Toast Notification -->
-    <div class="toast hidden" id="toast"></div>
+    <div class="toast hidden" id="toast">
+        <i class="fas fa-info-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
 
     <!-- Header -->
     <header>
@@ -1005,19 +1441,22 @@
         <div id="landingScreen">
             <!-- Hero Section -->
             <section class="hero">
-                <h2>AI Image Screener</h2>
-                <p class="hero-subtitle">
-                    A practical first-pass AI image screening system designed to identify images that require human review based on statistical and physical patterns.
-                </p>
-                <div class="performance-badge">
-                    <i class="fas fa-chart-line"></i> Screening accuracy: 40-90% detection rate across AI models
-                </div>
-                <br>
-                <button class="cta-button" id="tryNowBtn">
-                    <div class="btn-content">
-                        <i class="fas fa-play-circle"></i> Start Screening
+                <div class="hero-content">
+                    <h2>AI Image Screener</h2>
+                    <p class="hero-subtitle">
+                        A practical first-pass AI image screening system designed to identify images that require human review based on statistical and physical patterns.
+                    </p>
+                    <div class="performance-badge">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Screening accuracy: 40-90% detection rate across AI models</span>
                     </div>
-                </button>
+                    <button class="cta-button" id="tryNowBtn">
+                        <div class="btn-content">
+                            <i class="fas fa-play-circle"></i>
+                            Start Screening
+                        </div>
+                    </button>
+                </div>
             </section>
 
             <!-- Tab Navigation -->
@@ -1035,7 +1474,7 @@
                             <i class="fas fa-bolt"></i>
                         </div>
                         <h3>Fast Processing</h3>
-                        <p>Parallel processing for batch analysis with real-time progress tracking</p>
+                        <p>Parallel processing for batch analysis with real-time progress tracking and optimized performance.</p>
                     </div>
                     
                     <div class="feature-card">
@@ -1043,7 +1482,7 @@
                             <i class="fas fa-chart-bar"></i>
                         </div>
                         <h3>Multi-Signal Detection</h3>
-                        <p>Five independent statistical detectors with weighted ensemble aggregation</p>
+                        <p>Five independent statistical detectors with weighted ensemble aggregation for reliable results.</p>
                     </div>
 
                     <div class="feature-card">
@@ -1051,7 +1490,7 @@
                             <i class="fas fa-puzzle-piece"></i>
                         </div>
                         <h3>Evidence Analysis</h3>
-                        <p>Aggregates detection signals and metadata into structured evidence, resolving conflicts and supporting explainable, non-scoring decisions</p>
+                        <p>Aggregates detection signals and metadata into structured evidence, resolving conflicts.</p>
                     </div>
 
                     <div class="feature-card">
@@ -1059,7 +1498,7 @@
                             <i class="fas fa-balance-scale"></i>
                         </div>
                         <h3>Decision Policy</h3>
-                        <p>Applies deterministic rules over metrics and evidence to produce a review-aware final verdict, prioritizing safety and auditability</p>
+                        <p>Applies deterministic rules over metrics and evidence for review-aware final verdict.</p>
                     </div>
                     
                     <div class="feature-card">
@@ -1067,15 +1506,7 @@
                             <i class="fas fa-file-export"></i>
                         </div>
                         <h3>Comprehensive Reports</h3>
-                        <p>Export results in CSV and JSON formats for integration and documentation</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-sliders-h"></i>
-                        </div>
-                        <h3>Adjustable Sensitivity</h3>
-                        <p>Conservative, balanced, and aggressive modes for different use cases</p>
+                        <p>Export results in CSV and JSON formats for integration, documentation, and audit trails.</p>
                     </div>
                 </div>
 
@@ -1084,222 +1515,242 @@
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i> Important Notice</h3>
                     </div>
-                    <p style="color: var(--text-light);">
-                        <strong>This is not a perfect AI detector. It's a screening tool that helps reduce manual review workload by flagging suspicious images for human verification.</strong>
+                    <p style="color: var(--text-light); font-size: 0.9375rem; line-height: 1.6;">
+                        <strong>This is not a perfect AI detector.</strong> It's a screening tool that helps reduce manual review workload by flagging suspicious images for human verification. Always use human judgment for final decisions.
                     </p>
                 </div>
             </div>
 
-            <!-- Metrics Tab - Updated with Detailed Cards -->
+            <!-- Metrics Tab - UPDATED with proper separation -->
             <div class="tab-content" id="metricsTab">
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #4a5568 0%, #718096 100%);">
-                                <i class="fas fa-wave-square"></i>
-                            </div>
-                            <div>
-                                <div class="metric-title">Gradient-Field PCA</div>
-                            </div>
-                            <span class="metric-weight">Weight: 30%</span>
+                <!-- Signal-based Metrics Section -->
+                <div class="metrics-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-chart-bar"></i>
                         </div>
-                        <p class="metric-description">
-                            Detects lighting & gradient inconsistencies typical of diffusion models. Analyzes directional light patterns and shadow consistency that often appear unnatural in AI-generated images.
-                        </p>
-                        <div class="metric-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Detection Method</span>
-                                <span class="detail-value">Principal Component Analysis</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Sensitivity</span>
-                                <span class="detail-value">High for diffusion models</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Performance</span>
-                                <span class="detail-value">85-95% detection rate</span>
-                            </div>
+                        <div>
+                            <div class="section-title">Signal-based Detection Metrics</div>
+                            <div class="section-subtitle">Statistical analysis of image properties with weighted scoring</div>
                         </div>
                     </div>
                     
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #718096 0%, #a0aec0 100%);">
-                                <i class="fas fa-chart-line"></i>
+                    <div class="signal-metrics-grid">
+                        <div class="metric-card signal">
+                            <div class="metric-header">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #4a5568 0%, #718096 100%);">
+                                    <i class="fas fa-wave-square"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-title">Gradient-Field PCA</div>
+                                </div>
+                                <span class="metric-weight">30%</span>
                             </div>
-                            <div>
-                                <div class="metric-title">Frequency Analysis</div>
-                            </div>
-                            <span class="metric-weight">Weight: 25%</span>
-                        </div>
-                        <p class="metric-description">
-                            Identifies unnatural spectral energy distributions via FFT analysis. AI-generated images often show characteristic frequency patterns different from camera-captured photos.
-                        </p>
-                        <div class="metric-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Detection Method</span>
-                                <span class="detail-value">Fast Fourier Transform</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Sensitivity</span>
-                                <span class="detail-value">Medium-High</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Performance</span>
-                                <span class="detail-value">75-85% detection rate</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #38a169 0%, #68d391 100%);">
-                                <i class="fas fa-braille"></i>
-                            </div>
-                            <div>
-                                <div class="metric-title">Noise Pattern Analysis</div>
-                            </div>
-                            <span class="metric-weight">Weight: 20%</span>
-                        </div>
-                        <p class="metric-description">
-                            Detects missing or artificial sensor noise patterns. Real cameras produce characteristic noise while AI models often generate unnaturally uniform or missing noise patterns.
-                        </p>
-                        <div class="metric-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Detection Method</span>
-                                <span class="detail-value">Noise Distribution Analysis</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Sensitivity</span>
-                                <span class="detail-value">Medium</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Performance</span>
-                                <span class="detail-value">70-80% detection rate</span>
+                            <p class="metric-description">
+                                Detects lighting & gradient inconsistencies typical of diffusion models. Analyzes directional light patterns and shadow consistency.
+                            </p>
+                            <div class="metric-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Method</span>
+                                    <span class="detail-value">Principal Component Analysis</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Detection Rate</span>
+                                    <span class="detail-value">85-95%</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Sensitivity</span>
+                                    <span class="detail-value">High</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #d69e2e 0%, #ecc94b 100%);">
-                                <i class="fas fa-text-height"></i>
+                        
+                        <div class="metric-card signal">
+                            <div class="metric-header">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #718096 0%, #a0aec0 100%);">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-title">Frequency Analysis</div>
+                                </div>
+                                <span class="metric-weight">25%</span>
                             </div>
-                            <div>
-                                <div class="metric-title">Texture Statistics</div>
-                            </div>
-                            <span class="metric-weight">Weight: 15%</span>
-                        </div>
-                        <p class="metric-description">
-                            Identifies overly smooth or uniform texture regions. AI-generated images often lack the natural texture variation found in real photographs, especially in complex surfaces.
-                        </p>
-                        <div class="metric-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Detection Method</span>
-                                <span class="detail-value">GLCM Texture Analysis</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Sensitivity</span>
-                                <span class="detail-value">Medium-Low</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Performance</span>
-                                <span class="detail-value">60-70% detection rate</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #e53e3e 0%, #fc8181 100%);">
-                                <i class="fas fa-palette"></i>
-                            </div>
-                            <div>
-                                <div class="metric-title">Color Distribution</div>
-                            </div>
-                            <span class="metric-weight">Weight: 10%</span>
-                        </div>
-                        <p class="metric-description">
-                            Flags unnatural saturation and color histogram patterns. AI models often produce colors that are either oversaturated or have distribution patterns that differ from real photographs.
-                        </p>
-                        <div class="metric-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Detection Method</span>
-                                <span class="detail-value">Color Histogram Analysis</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Sensitivity</span>
-                                <span class="detail-value">Low-Medium</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Performance</span>
-                                <span class="detail-value">50-65% detection rate</span>
+                            <p class="metric-description">
+                                Identifies unnatural spectral energy distributions via FFT analysis. AI-generated images often show characteristic frequency patterns.
+                            </p>
+                            <div class="metric-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Method</span>
+                                    <span class="detail-value">Fast Fourier Transform</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Detection Rate</span>
+                                    <span class="detail-value">75-85%</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Sensitivity</span>
+                                    <span class="detail-value">Medium-High</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #2b6cb0 0%, #63b3ed 100%);">
-                                <i class="fas fa-camera-retro"></i>
+                        
+                        <div class="metric-card signal">
+                            <div class="metric-header">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #38a169 0%, #68d391 100%);">
+                                    <i class="fas fa-braille"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-title">Noise Pattern</div>
+                                </div>
+                                <span class="metric-weight">20%</span>
                             </div>
-                            <div>
-                                <div class="metric-title">EXIF Analyzer</div>
+                            <p class="metric-description">
+                                Detects missing or artificial sensor noise patterns. Real cameras produce characteristic noise while AI models generate uniform patterns.
+                            </p>
+                            <div class="metric-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Method</span>
+                                    <span class="detail-value">Noise Distribution</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Detection Rate</span>
+                                    <span class="detail-value">70-80%</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Sensitivity</span>
+                                    <span class="detail-value">Medium</span>
+                                </div>
                             </div>
-                            <span class="metric-weight">Auxiliary Metric</span>
                         </div>
-                    
-                        <p class="metric-description">
-                            Analyzes image metadata for presence, completeness, and plausibility.
-                            Real camera images usually contain coherent EXIF data, while AI-generated
-                            images often lack metadata or contain inconsistent fields.
-                        </p>
-                    
-                        <div class="metric-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Detection Method</span>
-                                <span class="detail-value">Metadata consistency analysis</span>
+                        
+                        <div class="metric-card signal">
+                            <div class="metric-header">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #d69e2e 0%, #ecc94b 100%);">
+                                    <i class="fas fa-text-height"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-title">Texture Statistics</div>
+                                </div>
+                                <span class="metric-weight">15%</span>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Signals</span>
-                                <span class="detail-value">Missing, stripped, or malformed EXIF</span>
+                            <p class="metric-description">
+                                Identifies overly smooth or uniform texture regions. AI-generated images often lack natural texture variation found in real photographs.
+                            </p>
+                            <div class="metric-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Method</span>
+                                    <span class="detail-value">GLCM Texture</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Detection Rate</span>
+                                    <span class="detail-value">60-70%</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Sensitivity</span>
+                                    <span class="detail-value">Medium-Low</span>
+                                </div>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Sensitivity</span>
-                                <span class="detail-value">Medium</span>
+                        </div>
+                        
+                        <div class="metric-card signal">
+                            <div class="metric-header">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #e53e3e 0%, #fc8181 100%);">
+                                    <i class="fas fa-palette"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-title">Color Distribution</div>
+                                </div>
+                                <span class="metric-weight">10%</span>
+                            </div>
+                            <p class="metric-description">
+                                Flags unnatural saturation and color histogram patterns. AI models produce colors with distribution patterns different from real photographs.
+                            </p>
+                            <div class="metric-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Method</span>
+                                    <span class="detail-value">Color Histogram</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Detection Rate</span>
+                                    <span class="detail-value">50-65%</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Sensitivity</span>
+                                    <span class="detail-value">Low-Medium</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #6b46c1 0%, #b794f4 100%);">
-                                <i class="fas fa-fingerprint"></i>
-                            </div>
-                            <div>
-                                <div class="metric-title">Watermark Analyzer</div>
-                            </div>
-                            <span class="metric-weight">Auxiliary Metric</span>
+                <!-- Evidence-based Metrics Section -->
+                <div class="metrics-section">
+                    <div class="section-header">
+                        <div class="section-icon evidence">
+                            <i class="fas fa-clipboard-check"></i>
                         </div>
+                        <div>
+                            <div class="section-title">Evidence-based Verification</div>
+                            <div class="section-subtitle">Additional verification through metadata and watermark analysis</div>
+                        </div>
+                    </div>
                     
-                        <p class="metric-description">
-                            Detects known and statistical watermark patterns embedded by generative
-                            models. Includes checks for frequency-domain artifacts and spatial
-                            regularities associated with AI watermarking techniques.
-                        </p>
-                    
-                        <div class="metric-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Detection Method</span>
-                                <span class="detail-value">Pattern & frequency-domain analysis</span>
+                    <div class="evidence-metrics-grid">
+                        <div class="metric-card evidence">
+                            <div class="metric-header">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #2b6cb0 0%, #63b3ed 100%);">
+                                    <i class="fas fa-camera-retro"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-title">EXIF Analyzer</div>
+                                </div>
+                                <span class="metric-weight evidence">Evidence</span>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Signals</span>
-                                <span class="detail-value">Model-specific watermark artifacts</span>
+                            <p class="metric-description">
+                                Analyzes image metadata for presence, completeness, and plausibility. Real camera images contain coherent EXIF data while AI-generated images often lack or have inconsistent metadata.
+                            </p>
+                            <div class="metric-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Method</span>
+                                    <span class="detail-value">Metadata Analysis</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Key Signals</span>
+                                    <span class="detail-value">Missing/Inconsistent EXIF</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Verification</span>
+                                    <span class="detail-value">Medium</span>
+                                </div>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Sensitivity</span>
-                                <span class="detail-value">Low–Medium (model-dependent)</span>
+                        </div>
+
+                        <div class="metric-card evidence">
+                            <div class="metric-header">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #6b46c1 0%, #b794f4 100%);">
+                                    <i class="fas fa-fingerprint"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-title">Watermark Analyzer</div>
+                                </div>
+                                <span class="metric-weight evidence">Evidence</span>
+                            </div>
+                            <p class="metric-description">
+                                Detects known and statistical watermark patterns embedded by generative models. Includes checks for frequency-domain artifacts and spatial regularities associated with AI watermarking techniques.
+                            </p>
+                            <div class="metric-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Method</span>
+                                    <span class="detail-value">Pattern Analysis</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Key Signals</span>
+                                    <span class="detail-value">Watermark Artifacts</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Verification</span>
+                                    <span class="detail-value">Model-Dependent</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1312,19 +1763,19 @@
                     <div class="step-card">
                         <div class="step-number">1</div>
                         <h3>Upload Images</h3>
-                        <p>Drag & drop or select images (JPG, PNG, WEBP)</p>
+                        <p>Drag & drop or select multiple images (JPG, PNG, WEBP formats supported).</p>
                     </div>
                     
                     <div class="step-card">
                         <div class="step-number">2</div>
                         <h3>Start Analysis</h3>
-                        <p>Click "Start Analysis" to begin screening</p>
+                        <p>Click "Start Analysis" to begin screening with real-time progress tracking.</p>
                     </div>
                     
                     <div class="step-card">
                         <div class="step-number">3</div>
                         <h3>Review Results</h3>
-                        <p>Check flagged images and export reports</p>
+                        <p>Check flagged images, view detailed analysis, and export comprehensive reports.</p>
                     </div>
                 </div>
             </div>
@@ -1337,7 +1788,7 @@
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-cloud-upload-alt"></i> Upload Images</h2>
                     <button class="action-button secondary-action" id="backHomeBtn">
-                        <i class="fas fa-arrow-left"></i> Back
+                        <i class="fas fa-arrow-left"></i> Back to Home
                     </button>
                 </div>
                 
@@ -1352,14 +1803,14 @@
                     </div>
                     <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.webp" style="display: none;">
                     <p class="text-center mt-2" style="color: var(--text-light); font-size: 0.875rem;">
-                        Supports JPG, JPEG, PNG, WEBP up to 10MB each
+                        Supports JPG, JPEG, PNG, WEBP • Maximum 10MB per file
                     </p>
                 </div>
                 
                 <!-- Thumbnail Grid -->
                 <div class="thumbnail-grid" id="thumbnailGrid"></div>
                 
-                <!-- Start Analysis Button - Centered -->
+                <!-- Start Analysis Button -->
                 <div class="mt-3" id="analyzeButtonContainer" style="display: none;">
                     <button class="start-analysis-btn" id="analyzeBtn">
                         <div class="btn-content">
@@ -1370,13 +1821,13 @@
                 
                 <div class="progress-container hidden" id="progressContainer">
                     <div class="progress-header">
-                        <span>Processing</span>
-                        <span id="progressPercent">0%</span>
+                        <span style="font-weight: 500;">Processing Images</span>
+                        <span id="progressPercent" style="font-weight: 600;">0%</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
-                    <div class="progress-details">
+                    <div class="progress-details" style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-light);">
                         <span id="currentFile" class="current-file">Ready to process</span>
                         <span id="progressStats">0 / 0</span>
                     </div>
@@ -1385,11 +1836,11 @@
             
             <!-- Results Section -->
             <div id="resultsSection" class="hidden">
-                <!-- Export Buttons -->
+                <!-- Results Card -->
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-chart-bar"></i> Analysis Results</h2>
-                        <div class="results-actions">
+                        <div class="results-actions" style="display: flex; gap: 0.5rem;">
                             <button class="action-button secondary-action" id="exportCsvBtn">
                                 <i class="fas fa-file-csv"></i> CSV
                             </button>
@@ -1397,7 +1848,7 @@
                                 <i class="fas fa-file-code"></i> JSON
                             </button>
                             <button class="action-button secondary-action" id="newAnalysisBtn">
-                                <i class="fas fa-redo"></i> New
+                                <i class="fas fa-redo"></i> New Analysis
                             </button>
                         </div>
                     </div>
@@ -1407,7 +1858,7 @@
                         <!-- Summary cards will be populated here -->
                     </div>
                     
-                    <!-- Results Table -->
+                    <!-- Results Table - FIXED FOR NO SCROLLING -->
                     <div class="results-table-container">
                         <table class="results-table" id="resultsTable">
                             <thead>
@@ -1418,7 +1869,6 @@
                                     <th>Signals</th>
                                     <th>Evidence</th>
                                     <th>Details</th>
-
                                 </tr>
                             </thead>
                             <tbody id="resultsTableBody">
@@ -1452,16 +1902,17 @@
         </div>
     </div>
     
-    <!-- Footer with reduced spacing -->
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-links">
                 <a href="#" class="footer-link">Documentation</a>
                 <a href="#" class="footer-link">API Reference</a>
-                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Privacy Policy</a>
                 <a href="#" class="footer-link">Support</a>
+                <a href="#" class="footer-link">GitHub</a>
             </div>
-            <p>AI Image Screener v1.0.0 © 2025</p>
+            <p style="margin-top: 0.5rem;">AI Image Screener v1.0.0 © 2025</p>
         </div>
     </footer>
 
@@ -1487,6 +1938,8 @@
         const resultsSection = document.getElementById('resultsSection');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const loadingText = document.getElementById('loadingText');
         const tryNowBtn = document.getElementById('tryNowBtn');
         const backHomeBtn = document.getElementById('backHomeBtn');
         const newAnalysisBtn = document.getElementById('newAnalysisBtn');
@@ -1522,8 +1975,18 @@
         
         // Toast notification
         function showToast(message, type = 'success') {
-            toast.textContent = message;
+            toastMessage.textContent = message;
             toast.className = `toast ${type} show`;
+            
+            // Set appropriate icon
+            const icon = toast.querySelector('i');
+            if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle';
+            } else if (type === 'warning') {
+                icon.className = 'fas fa-exclamation-triangle';
+            } else {
+                icon.className = 'fas fa-check-circle';
+            }
             
             setTimeout(() => {
                 toast.classList.remove('show');
@@ -1531,8 +1994,9 @@
         }
         
         // Loading overlay
-        function showLoading(show) {
+        function showLoading(show, message = 'Processing...') {
             if (show) {
+                loadingText.textContent = message;
                 loadingOverlay.classList.add('active');
             } else {
                 loadingOverlay.classList.remove('active');
@@ -1556,24 +2020,23 @@
             });
         }
         
-        // Setup event listeners - FIXED FOR ONE-CLICK UPLOAD
+        // Setup event listeners
         function setupEventListeners() {
             // Navigation
             tryNowBtn.addEventListener('click', showAnalysisScreen);
             backHomeBtn.addEventListener('click', showLandingScreen);
             newAnalysisBtn.addEventListener('click', resetAnalysis);
             
-            // File upload - ONLY ONE CLICK HANDLER
+            // File upload
             fileInputBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent bubbling
+                e.stopPropagation();
                 fileInput.click();
             });
             
             // File input change handler
             fileInput.addEventListener('change', handleFileSelect);
             
-            // Remove the uploadArea click handler that was causing double triggers
-            // Keep only drag and drop handlers for uploadArea
+            // Upload area drag and drop handlers
             uploadArea.addEventListener('dragover', handleDragOver);
             uploadArea.addEventListener('dragleave', handleDragLeave);
             uploadArea.addEventListener('drop', handleDrop);
@@ -1609,16 +2072,19 @@
         // File handling
         function handleDragOver(e) {
             e.preventDefault();
+            e.stopPropagation();
             uploadArea.classList.add('dragover');
         }
         
         function handleDragLeave(e) {
             e.preventDefault();
+            e.stopPropagation();
             uploadArea.classList.remove('dragover');
         }
         
         function handleDrop(e) {
             e.preventDefault();
+            e.stopPropagation();
             uploadArea.classList.remove('dragover');
             
             const droppedFiles = Array.from(e.dataTransfer.files);
@@ -1632,7 +2098,6 @@
             if (selectedFiles.length > 0) {
                 processFiles(selectedFiles);
             }
-            // Clear the input value to allow same file selection
             e.target.value = '';
         }
         
@@ -1657,7 +2122,7 @@
             }
             
             if (validFiles.length > 0) {
-                showLoading(true);
+                showLoading(true, 'Processing thumbnails...');
                 
                 try {
                     // Generate thumbnails
@@ -1673,7 +2138,7 @@
                     
                     files.push(...validFiles);
                     updateThumbnailGrid();
-                    showToast(`Added ${validFiles.length} file(s)`, 'success');
+                    showToast(`Added ${validFiles.length} file${validFiles.length > 1 ? 's' : ''}`, 'success');
                 } catch (error) {
                     console.error('Error processing files:', error);
                     showToast('Error processing files. Please try again.', 'error');
@@ -1711,9 +2176,13 @@
                         
                         canvas.width = width;
                         canvas.height = height;
+                        
+                        // Draw image with better quality
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
                     };
                     img.onerror = reject;
                     img.src = e.target.result;
@@ -1742,13 +2211,18 @@
                 
                 const dataUrl = fileDataUrls[file.name] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="14" text-anchor="middle" fill="%23999">No preview</text></svg>';
                 
+                // Truncate filename if too long
+                const displayName = file.name.length > 20 ? 
+                    file.name.substring(0, 17) + '...' : 
+                    file.name;
+                
                 thumbnailItem.innerHTML = `
-                    <img src="${dataUrl}" alt="${file.name}" class="thumbnail-img">
+                    <img src="${dataUrl}" alt="${file.name}" class="thumbnail-img" loading="lazy">
                     <div class="thumbnail-overlay">
-                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;">
-                            ${file.name}
+                        <span title="${file.name}">
+                            ${displayName}
                         </span>
-                        <button class="remove-thumbnail" data-index="${index}">
+                        <button class="remove-thumbnail" data-index="${index}" title="Remove">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -1779,13 +2253,13 @@
         async function startAnalysis() {
             if (files.length === 0) return;
             
-            showLoading(true);
+            showLoading(true, 'Starting analysis...');
             analyzeBtn.disabled = true;
             analyzeBtn.innerHTML = '<span class="spinner"></span> Processing...';
             
             progressFill.style.width = '0%';
             progressPercent.textContent = '0%';
-            currentFile.textContent = 'Starting analysis...';
+            currentFile.textContent = 'Preparing analysis...';
             progressStats.textContent = `0 / ${files.length}`;
             progressContainer.classList.remove('hidden');
             
@@ -1814,8 +2288,6 @@
                 const apiResponse = await response.json();
                 console.log('API response:', apiResponse);
                 
-                showLoading(false);
-                
                 if (!apiResponse.success) {
                     throw new Error(apiResponse.message || 'API request failed');
                 }
@@ -1827,6 +2299,7 @@
                     console.log('Polling mode: batch_id =', data.batch_id);
                     currentBatchId = data.batch_id;
                     showToast('Analysis started. Processing in background...', 'success');
+                    showLoading(false);
                     startPollingProgress();
                     
                 } else if (data && data.result) {
@@ -1849,7 +2322,7 @@
                             block: 'start'
                         });
                         
-                        showToast(`Analysis complete! Processed ${files.length} image(s)`, 'success');
+                        showToast(`Analysis complete! Processed ${files.length} image${files.length > 1 ? 's' : ''}`, 'success');
                     }, 500);
                     
                 } else {
@@ -1950,36 +2423,41 @@
                     return {
                         label: 'Mostly Authentic',
                         badgeClass: 'status-authentic',
-                        recommendation: 'No immediate action required'
+                        recommendation: 'No immediate action required',
+                        icon: 'fa-check-circle'
                     };
 
                 case 'AUTHENTIC_BUT_REVIEW':
                     return {
                         label: 'Authentic But Review',
                         badgeClass: 'status-review',
-                        recommendation: 'Optional human review'
+                        recommendation: 'Optional human review recommended',
+                        icon: 'fa-eye'
                     };
 
                 case 'SUSPICIOUS_AI_LIKELY':
                     return {
                         label: 'Suspicious AI Likely',
                         badgeClass: 'status-review',
-                        recommendation: 'Manual verification recommended'
+                        recommendation: 'Manual verification recommended',
+                        icon: 'fa-exclamation-triangle'
                     };
 
                 case 'CONFIRMED_AI_GENERATED':
                     return {
                         label: 'Confirmed AI Generated',
                         badgeClass: 'status-danger',
-                        recommendation: 'Block or audit required'
+                        recommendation: 'Block or audit required',
+                        icon: 'fa-times-circle'
                     };
 
                 default:
                     console.warn('Unknown decision:', decision);
                     return {
-                        label: humanizeDecision(decision || 'UNKNOWN'),
+                        label: decision || 'UNKNOWN',
                         badgeClass: 'status-review',
-                        recommendation: 'Manual review required'
+                        recommendation: 'Manual review required',
+                        icon: 'fa-question-circle'
                     };
             }
         }
@@ -2024,67 +2502,76 @@
                 
                 const flaggedCount = signals.filter(s => s.status === 'flagged').length;
                 const warningCount = signals.filter(s => s.status === 'warning').length;
+                const passedCount = signals.filter(s => s.status === 'passed').length;
                 
                 // Get thumbnail
-                const thumbnailSrc = fileDataUrls[filename] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="%23f0f0f0"/></svg>';
+                const thumbnailSrc = fileDataUrls[filename] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="%23f0f0f0"/></svg>';
+                
+                // Truncate filename if too long
+                const displayFilename = filename.length > 25 ? 
+                    filename.substring(0, 22) + '...' : 
+                    filename;
                 
                 row.innerHTML = `
-                    <td style="min-width: 200px;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <img src="${thumbnailSrc}" alt="${filename}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 0.25rem; border: 1px solid var(--border);">
-                            <div>
-                                <div style="font-weight: 500; font-size: 0.875rem;">${filename}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-light);">
-                                    ${imageSize[0]} × ${imageSize[1]}
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <img src="${thumbnailSrc}" alt="${filename}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 0.25rem; border: 1px solid var(--border);">
+                            <div style="min-width: 0;">
+                                <div style="font-weight: 600; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${filename}">${displayFilename}</div>
+                                <div style="font-size: 0.65rem; color: var(--text-light);">
+                                    ${imageSize[0]}×${imageSize[1]}
                                 </div>
                             </div>
                         </div>
                     </td>
                     <td>
                         <span class="status-badge ${meta.badgeClass}">
+                            <i class="fas ${meta.icon}" style="margin-right: 0.125rem; font-size: 0.7rem;"></i>
                             ${meta.label}
                         </span>
                     </td>
                     <td>
                         <div class="score-indicator">
-                            <span style="min-width: 40px; font-size: 0.875rem;">${scorePercent}%</span>
+                            <span style="min-width: 30px; font-size: 0.75rem; font-weight: 600;">${scorePercent}%</span>
                             <div class="score-bar">
                                 <div class="score-fill ${scoreClass}" style="width: ${scoreWidth}"></div>
                             </div>
                         </div>
                     </td>
-                    <td style="min-width: 150px;">
-                        <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
-                            ${flaggedCount > 0 ? `<span class="signal-badge signal-flagged" style="font-size: 0.7rem;">${flaggedCount} flagged</span>` : ''}
-                            ${warningCount > 0 ? `<span class="signal-badge signal-warning" style="font-size: 0.7rem;">${warningCount} warning</span>` : ''}
-                            ${signals.length - flaggedCount - warningCount > 0 ? 
-                            `<span class="signal-badge signal-passed" style="font-size: 0.7rem;">${signals.length - flaggedCount - warningCount} passed</span>` : ''}
+                    <td>
+                        <div class="signals-badges">
+                            ${flaggedCount > 0 ? `<span class="signal-badge signal-flagged">${flaggedCount}F</span>` : ''}
+                            ${warningCount > 0 ? `<span class="signal-badge signal-warning">${warningCount}W</span>` : ''}
+                            ${passedCount > 0 ? `<span class="signal-badge signal-passed">${passedCount}P</span>` : ''}
                         </div>
                     </td>
-                    <td style="min-width: 160px;">
-                        <div style="display:flex;gap:0.25rem;flex-wrap:wrap;">
+                    <td>
+                        <div class="evidence-badges">
                             ${evidenceSummary.AI > 0 
-                                ? `<span class="signal-badge signal-flagged" style="font-size:0.7rem;">
-                                    ${evidenceSummary.AI} AI
+                                ? `<span class="evidence-badge evidence-ai" title="AI Evidence">
+                                    <i class="fas fa-robot" style="margin-right: 0.125rem; font-size: 0.6rem;"></i>
+                                    ${evidenceSummary.AI}
                                 </span>` 
                                 : ''}
 
                             ${evidenceSummary.AUTHENTIC > 0 
-                                ? `<span class="signal-badge signal-passed" style="font-size:0.7rem;">
-                                    ${evidenceSummary.AUTHENTIC} authentic
+                                ? `<span class="evidence-badge evidence-authentic" title="Authentic Evidence">
+                                    <i class="fas fa-check" style="margin-right: 0.125rem; font-size: 0.6rem;"></i>
+                                    ${evidenceSummary.AUTHENTIC}
                                 </span>` 
                                 : ''}
 
                             ${evidenceSummary.INDETERMINATE > 0 
-                                ? `<span class="signal-badge signal-warning" style="font-size:0.7rem;">
-                                    ${evidenceSummary.INDETERMINATE} indeterminate
+                                ? `<span class="evidence-badge evidence-indeterminate" title="Indeterminate Evidence">
+                                    <i class="fas fa-question" style="margin-right: 0.125rem; font-size: 0.6rem;"></i>
+                                    ${evidenceSummary.INDETERMINATE}
                                 </span>` 
                                 : ''}
                         </div>
                     </td>
                     <td>
-                        <button class="action-button secondary-action view-detail-btn" data-index="${index}" title="View Details" style="padding: 0.25rem 0.5rem;">
-                            <i class="fas fa-eye"></i>
+                        <button class="action-button secondary-action view-detail-btn" data-index="${index}" title="View Detailed Analysis" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-search" style="font-size: 0.7rem;"></i>
                         </button>
                     </td>
                 `;
@@ -2094,6 +2581,7 @@
             
             noResultsRow.classList.add('hidden');
             
+            // Add event listeners to view detail buttons
             document.querySelectorAll('.view-detail-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -2102,6 +2590,7 @@
                 });
             });
             
+            // Make entire row clickable for detailed view
             document.querySelectorAll('#resultsTableBody tr').forEach(row => {
                 row.addEventListener('click', (e) => {
                     if (!e.target.closest('.view-detail-btn')) {
@@ -2127,7 +2616,7 @@
                 counts[status] = (counts[status] || 0) + 1;
             });
 
-            // Stable, policy-aligned display order
+            // Display order
             const ORDER = [
                 'CONFIRMED_AI_GENERATED',
                 'SUSPICIOUS_AI_LIKELY',
@@ -2192,23 +2681,35 @@
                     signalsHtml += `
                         <div class="signal-card">
                             <div class="signal-header">
-                                <strong>${signal.name || 'Unknown Metric'}</strong>
+                                <strong style="font-size: 0.9375rem;">${signal.name || 'Unknown Metric'}</strong>
                                 <span class="signal-badge ${statusClass}">${signal.status}</span>
                             </div>
                             <p style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.5rem;">
                                 ${signal.explanation || 'No explanation available.'}
                             </p>
-                            <div style="font-size:0.75rem;color:var(--text-light);">
-                                Score: ${signalScore}%
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <div class="info-pill">
+                                    <i class="fas fa-chart-line"></i>
+                                    Score: ${signalScore}%
+                                </div>
+                                <div class="info-pill">
+                                    <i class="fas fa-weight-hanging"></i>
+                                    Weight: ${signal.weight || 'N/A'}
+                                </div>
                             </div>
                         </div>
                     `;
                 });
             } else {
                 signalsHtml = `
-                    <p class="text-center" style="color:var(--text-light);">
-                        No detection signals available.
-                    </p>
+                    <div class="signal-card">
+                        <div class="signal-header">
+                            <strong>Detection Signals</strong>
+                        </div>
+                        <p class="text-center" style="color:var(--text-light); padding: 1rem;">
+                            No detection signals available for this image.
+                        </p>
+                    </div>
                 `;
             }
 
@@ -2218,81 +2719,128 @@
             if (evidence.length > 0) {
                 evidence.forEach(ev => {
                     let badgeClass = 'signal-passed';
-                    if (ev.direction === 'AI_GENERATED') badgeClass = 'signal-flagged';
-                    if (ev.direction === 'INDETERMINATE') badgeClass = 'signal-warning';
+                    let icon = 'fa-check';
+                    if (ev.direction === 'AI_GENERATED') {
+                        badgeClass = 'signal-flagged';
+                        icon = 'fa-robot';
+                    }
+                    if (ev.direction === 'INDETERMINATE') {
+                        badgeClass = 'signal-warning';
+                        icon = 'fa-question';
+                    }
 
                     evidenceHtml += `
                         <div class="signal-card" style="background:#f1f5f9;">
                             <div class="signal-header">
-                                <strong>${ev.source.toUpperCase()}</strong>
+                                <strong style="font-size: 0.9375rem;">${ev.source.toUpperCase()}</strong>
                                 <span class="signal-badge ${badgeClass}">
+                                    <i class="fas ${icon}" style="margin-right: 0.125rem;"></i>
                                     ${ev.strength}
                                 </span>
                             </div>
-                            <p style="font-size:0.875rem;margin-bottom:0.5rem;">
+                            <p style="font-size:0.875rem;margin-bottom:0.5rem;color:var(--text);">
                                 ${ev.finding}
                             </p>
-                            <div style="font-size:0.75rem;color:#64748b;">
-                                Analyzer: ${ev.analyzer}
-                                ${ev.confidence != null ? ` • Confidence: ${Math.round(ev.confidence * 100)}%` : ''}
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <div class="info-pill">
+                                    <i class="fas fa-microscope"></i>
+                                    ${ev.analyzer}
+                                </div>
+                                ${ev.confidence != null ? 
+                                `<div class="info-pill">
+                                    <i class="fas fa-brain"></i>
+                                    Confidence: ${Math.round(ev.confidence * 100)}%
+                                </div>` : ''}
                             </div>
                         </div>
                     `;
                 });
             } else {
                 evidenceHtml = `
-                    <p class="text-center" style="color:var(--text-light);">
-                        No declarative evidence detected.
-                    </p>
+                    <div class="signal-card" style="background:#f1f5f9;">
+                        <div class="signal-header">
+                            <strong>Evidence</strong>
+                        </div>
+                        <p class="text-center" style="color:var(--text-light); padding: 1rem;">
+                            No declarative evidence detected for this image.
+                        </p>
+                    </div>
                 `;
             }
 
             /* ---------- Render ---------- */
             detailedAnalysisContent.innerHTML = `
-                <div style="margin-bottom:1.5rem;">
-                    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
-                        <img src="${fileDataUrls[filename] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="%23f0f0f0"/></svg>'}"
-                            alt="${filename}"
-                            style="width:60px;height:60px;object-fit:cover;border-radius:0.5rem;border:1px solid var(--border);">
-                        <div>
-                            <h4 style="margin-bottom:0.25rem;">${filename}</h4>
-                            <div style="font-size:0.875rem;color:var(--text-light);">
-                                ${imageSize[0]} × ${imageSize[1]} • ${processingTime.toFixed(2)}s
+                <div style="margin-bottom:2rem;">
+                    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+                        <div style="position:relative;">
+                            <img src="${fileDataUrls[filename] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="%23f0f0f0"/></svg>'}"
+                                alt="${filename}"
+                                style="width:80px;height:80px;object-fit:cover;border-radius:0.75rem;border:2px solid var(--border);box-shadow:var(--shadow);">
+                            <div style="position:absolute;bottom:-8px;right:-8px;background:white;border:1px solid var(--border);border-radius:0.5rem;padding:0.25rem 0.5rem;font-size:0.75rem;color:var(--text-light);box-shadow:var(--shadow);">
+                                ${imageSize[0]}×${imageSize[1]}
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <h4 style="margin-bottom:0.5rem;font-size:1.25rem;">${filename}</h4>
+                            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                                <div class="info-pill">
+                                    <i class="fas fa-clock"></i>
+                                    ${processingTime.toFixed(2)}s
+                                </div>
+                                <div class="info-pill">
+                                    <i class="fas fa-database"></i>
+                                    ${signals.length} signals
+                                </div>
+                                <div class="info-pill">
+                                    <i class="fas fa-layer-group"></i>
+                                    ${evidence.length} evidence
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
-                        <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:0.5rem;">
-                            <div style="font-size:1.5rem;font-weight:700;">${scorePercent}%</div>
-                            <div style="font-size:0.875rem;color:var(--text-light);">Score</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;">
+                        <div style="text-align:center;padding:1.5rem;background:linear-gradient(135deg,#f8fafc,#edf2f7);border-radius:0.75rem;border:1px solid var(--border);">
+                            <div style="font-size:2rem;font-weight:800;margin-bottom:0.25rem;">${scorePercent}%</div>
+                            <div style="font-size:0.875rem;color:var(--text-light);font-weight:500;">Score</div>
                         </div>
-                        <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:0.5rem;">
-                            <div style="font-size:1.25rem;font-weight:700;">${meta.label}</div>
-                            <div style="font-size:0.875rem;color:var(--text-light);">Verdict</div>
+                        <div style="text-align:center;padding:1.5rem;background:linear-gradient(135deg,#f8fafc,#edf2f7);border-radius:0.75rem;border:1px solid var(--border);">
+                            <div style="font-size:1.25rem;font-weight:700;margin-bottom:0.25rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+                                <i class="fas ${meta.icon}"></i>
+                                ${meta.label}
+                            </div>
+                            <div style="font-size:0.875rem;color:var(--text-light);font-weight:500;">Verdict</div>
                         </div>
-                        <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:0.5rem;">
-                            <div style="font-size:1.5rem;font-weight:700;">${confidence}%</div>
-                            <div style="font-size:0.875rem;color:var(--text-light);">Confidence</div>
+                        <div style="text-align:center;padding:1.5rem;background:linear-gradient(135deg,#f8fafc,#edf2f7);border-radius:0.75rem;border:1px solid var(--border);">
+                            <div style="font-size:2rem;font-weight:800;margin-bottom:0.25rem;">${confidence}%</div>
+                            <div style="font-size:0.875rem;color:var(--text-light);font-weight:500;">Confidence</div>
                         </div>
                     </div>
                 </div>
 
-                <h4 style="margin-bottom:0.75rem;">Detection Signals</h4>
-                <div class="signal-grid">
+                <h4 style="margin-bottom:1rem;font-size:1.125rem;color:var(--primary);">
+                    <i class="fas fa-bell"></i> Detection Signals
+                </h4>
+                <div class="signal-grid" style="margin-bottom:2rem;">
                     ${signalsHtml}
                 </div>
 
-                <h4 style="margin:1.5rem 0 0.75rem;">Evidence</h4>
-                <div class="signal-grid">
+                <h4 style="margin-bottom:1rem;font-size:1.125rem;color:var(--primary);">
+                    <i class="fas fa-clipboard-check"></i> Evidence
+                </h4>
+                <div class="signal-grid" style="margin-bottom:2rem;">
                     ${evidenceHtml}
                 </div>
 
-                <div class="signal-card" style="margin-top:1.5rem;">
+                <div class="signal-card" style="background:linear-gradient(135deg,#f0f9ff,#e6f7ff);border:1px solid rgba(49,130,206,0.2);">
                     <div class="signal-header">
-                        <strong>Decision Explanation</strong>
+                        <strong style="color:var(--accent);">
+                            <i class="fas fa-comment-alt"></i> Decision Explanation
+                        </strong>
                     </div>
-                    <p>${result.decision_explanation || meta.recommendation}</p>
+                    <p style="font-size:0.9375rem;color:var(--text);line-height:1.6;margin-top:0.5rem;">
+                        ${result.decision_explanation || meta.recommendation}
+                    </p>
                 </div>
             `;
         }
@@ -2304,20 +2852,15 @@
                 return;
             }
             
-            showLoading(true);
+            showLoading(true, 'Generating CSV report...');
             try {
-                // Using GET request since backend now accepts both GET and POST
                 const response = await fetch(`${CSV_REPORT_ENDPOINT}/${currentBatchId}`);
                 
                 if (response.ok) {
-                    // Get the blob data
                     const blob = await response.blob();
-                    
-                    // Create download link
                     const downloadLink = document.createElement('a');
                     downloadLink.href = URL.createObjectURL(blob);
                     downloadLink.download = `ai_screener_report_${currentBatchId}.csv`;
-                    
                     document.body.appendChild(downloadLink);
                     downloadLink.click();
                     document.body.removeChild(downloadLink);
@@ -2340,7 +2883,7 @@
                 return;
             }
             
-            showLoading(true);
+            showLoading(true, 'Generating JSON report...');
             try {
                 const dataStr = JSON.stringify(batchResults, null, 2);
                 const dataBlob = new Blob([dataStr], {type: 'application/json'});

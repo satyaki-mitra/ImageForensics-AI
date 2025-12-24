@@ -34,10 +34,15 @@ license: mit
 ## 📖 Table of Contents
 - [Overview](#-overview)
 - [Key Features](#-key-features)
-- [Architecture](#-architecture-overview)
+- [Architecture Overview](#-architecture-overview)
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
-- [Performance](#-performance--accuracy)
+- [Documentation](#-documentation)
+- [Technical Details](#technical-details)
+- [API Documentation](#api-documentation)
+- [System Architecture](#-system-architecture)
+- [Performance](#performance--accuracy)
+- [Ethical Considerations](#-ethical-considerations--limitations)
 - [License](#-license)
 
 ---
@@ -65,11 +70,17 @@ license: mit
   - **Tier-1**: 5 statistical metric detectors
   - **Tier-2**: Declarative evidence analyzers (EXIF, watermark)
   - **Decision Layer**: Evidence-first policy engine
+
 - **Multi-Class Decisions**: Four nuanced outcomes beyond binary classification
+
 - **Full Explainability**: Per-metric scores, evidence findings, and human-readable explanations
+
 - **Batch Processing**: Parallel analysis of up to 50 images with progress tracking
+
 - **Multiple Export Formats**: CSV, JSON reports for integration into existing workflows
+
 - **No External Dependencies**: No ML models, no cloud APIs - fully self-contained
+
 - **Production Ready**: FastAPI backend, comprehensive error handling, configurable thresholds
 
 ---
@@ -163,78 +174,209 @@ flowchart TD
     class Final1,Final2,Final3,Final4 final
 ```
 
-### Component Diagram
+---
+
+## 📚 Documentation
+
+For detailed technical information, see our comprehensive documentation:
+
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API reference, endpoints, request/response formats, and examples
+- **[Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md)** - In-depth technical details, algorithms, mathematical formulations, and implementation specifics
+- **[Architecture Guide](docs/ARCHITECTURE.md)** - System architecture, component interactions, data flow, and deployment diagrams
+
+---
+
+## 🔬 Technical Details
+
+For those interested in the underlying algorithms and implementation:
+
+### Algorithmic Foundations
+
+#### a) Gradient-Field PCA Analysis
+
+For each color channel $C \in \{R, G, B\}$:
+
+1. **Compute Sobel gradients**:
+   ```math
+   $$G_x = S_x * C, \quad G_y = S_y * C$$
+   ```
+
+   where $S_x, S_y$ are Sobel operators
+
+2. **Construct gradient matrix**:
+   ```math
+   $$M = \begin{bmatrix} \text{vec}(G_x) & \text{vec}(G_y) \end{bmatrix}^T$$
+   ```
+
+3. **Perform PCA**:
+   ```math
+   $$\text{cov} = M^T M, \quad \text{eigenvalues} = \text{eig}(\text{cov})$$
+   ```
+
+4. **Compute eigenvalue ratio**:
+   ```math
+   $$\text{ratio} = \frac{\lambda_2}{\lambda_1 + \lambda_2}$$
+   ```
+
+
+#### b) Frequency Domain Analysis
+
+Let $I(x,y)$ be the luminance channel:
+
+1. **Compute 2D FFT**:
+   ```math
+   $$F(u,v) = \mathcal{F}\{I(x,y)\}$$
+   ```
+
+2. **Radial spectrum**:
+   ```math
+   $$P(r) = \frac{1}{N_r} \sum_{r \leq \sqrt{u^2+v^2} < r+1} |F(u,v)|^2$$
+   ```
+
+3. **High-frequency ratio**:
+   ```math
+   $$\text{HF ratio} = \frac{\sum_{r>R_c} P(r)}{\sum_{r} P(r)}$$
+   ```
+
+   where $R_c$ is the cutoff radius
+
+#### c) LSB Steganography Detection
+
+For each color channel $C$:
+
+```math
+$$\text{LSB}(C) = C \ \&\ 1$$
+```
+
+**Statistical test**:
+
+```math
+$$\chi^2 = \sum_{b=0}^{1} \frac{(H(b) - E)^2}{E}$$
+```
+
+where $H(b)$ is the histogram of LSB values and $E = \frac{H}{2}$
+
+---
+
+## 🔌 API Documentation
+
+### REST API Endpoints
+
+#### `POST /analyze/image`
+Analyze a single image file.
+
+**Request**:
+
+```bash
+curl -X POST http://localhost:8005/analyze/image \
+  -F "file=@image.jpg" \
+  -H "Accept: application/json"
+```
+
+**Response**:
+
+```json
+{
+  "image_id": "img_abc123",
+  "filename": "image.jpg",
+  "decision": "MOSTLY_AUTHENTIC",
+  "confidence": 0.85,
+  "tier1_metrics": {
+    "gradient_pca": {"score": 0.72, "status": "REVIEW_REQUIRED"},
+    "frequency_fft": {"score": 0.91, "status": "LIKELY_AUTHENTIC"},
+    "...": "..."
+  },
+  "evidence_findings": [
+    {"type": "EXIF", "direction": "AUTHENTIC", "strength": "MODERATE"}
+  ],
+  "explanation": "Image shows strong authentic EXIF data..."
+}
+```
+
+> For complete API documentation, see [API Documentation](docs/API_DOCUMENTATION.md)
+
+---
+
+## 🏗️ System Architecture
+
+### Component Structure
+
+```bash
+ImageForensics-AI/
+├── app.py                              # FastAPI application
+├── config/
+│   ├── settings.py                     # Environment config
+│   ├── constants.py                    # Enums, parameters, explanations
+│   └── schemas.py                      # Pydantic models
+├── metrics/                            # TIER 1: Statistical detectors
+│   ├── gradient_field_pca.py
+│   ├── frequency_analyzer.py
+│   ├── noise_analyzer.py
+│   ├── texture_analyzer.py
+│   ├── color_analyzer.py
+│   └── signal_aggregator.py            # Metric orchestration
+├── evidence_analyzers/                 # TIER 2: Declarative evidence
+│   ├── exif_analyzer.py
+│   ├── watermark_analyzer.py
+│   └── evidence_aggregator.py          # Evidence orchestration
+├── decision_builders/
+│   └── decision_policy.py              # Evidence-first decision rules
+├── features/
+│   ├── batch_processor.py              # Batch orchestration
+│   ├── threshold_manager.py            # Runtime configuration
+│   └── detailed_result_maker.py        # Explainability extraction
+├── reporter/
+│   ├── csv_reporter.py                 # CSV export
+│   └── json_reporter.py                # JSON API responses
+├── utils/
+│   ├── logger.py                       # Structured logging
+│   ├── image_processor.py              # Image utilities
+│   ├── validators.py                   # File validation
+│   └── helpers.py                      # General utilities
+└── ui/
+    └── index.html                      # Web interface
+```
+
+### Data Flow
+
+```
+Image → Validation → [Tier-1 Metrics + Tier-2 Evidence] → Aggregation → Decision Policy → Final Decision → Reporting
+                      ↗               ↗                                  ↖
+              SignalAggregator  EvidenceAggregator                  DecisionPolicy
+```
+
+
+### Component Interactions
 
 ```mermaid
 flowchart TD
-    %% Overall System Flow
-    Input[📁 Input: Image File<br/>Validated by ImageValidator]
-    
-    %% Tier 1: Statistical Metrics (Actual Components)
-    subgraph T1 [Tier 1: Statistical Metrics - metrics/]
-        G[metrics/gradient_field_pca.py]
-        F[metrics/frequency_analyzer.py]
-        N[metrics/noise_analyzer.py]
-        T[metrics/texture_analyzer.py]
-        C[metrics/color_analyzer.py]
+    subgraph "API Layer"
+        API[FastAPI Server]
+        VALIDATOR[Image Validator]
     end
     
-    %% Tier 1 Aggregation
-    SA[metrics/signal_aggregator.py<br/>Signal Aggregator]
-    Status{LIKELY_AUTHENTIC<br/>or REVIEW_REQUIRED}
-    
-    %% Tier 2: Declarative Evidence (Actual Components)
-    subgraph T2 [Tier 2: Declarative Evidence - evidence_analyzers/]
-        EX[evidence_analyzers/exif_analyzer.py]
-        WM[evidence_analyzers/watermark_analyzer.py]
-        EA[evidence_analyzers/evidence_aggregator.py]
+    subgraph "Processing Layer"
+        BATCH[Batch Processor]
     end
     
-    Evidence[(Evidence Results:<br/>source, direction, strength, confidence)]
+    subgraph "Detection Layer"
+        METRICS[Tier-1 Metrics]
+        EVIDENCE[Tier-2 Evidence]
+    end
     
-    %% Decision Engine
-    DP[decision_builders/decision_policy.py<br/>Evidence-First Decision Policy]
+    subgraph "Decision Layer"
+        POLICY[Decision Policy Engine]
+    end
     
-    %% Final Decisions
-    FD1[🔴 CONFIRMED_AI_GENERATED<br/>Conclusive evidence<br/>e.g., cryptographic watermark]
-    FD2[🟠 SUSPICIOUS_AI_LIKELY<br/>Strong evidence or high metrics]
-    FD3[🟡 AUTHENTIC_BUT_REVIEW<br/>Conflicting/indeterminate evidence]
-    FD4[🟢 MOSTLY_AUTHENTIC<br/>Strong authentic evidence]
-    
-    %% Connections
-    Input --> T1
-    Input --> T2
-    
-    G --> SA
-    F --> SA
-    N --> SA
-    T --> SA
-    C --> SA
-    SA --> Status
-    
-    EX --> EA
-    WM --> EA
-    EA --> Evidence
-    
-    Status --> DP
-    Evidence --> DP
-    
-    DP --> FD1
-    DP --> FD2
-    DP --> FD3
-    DP --> FD4
-    
-    %% Styling
-    classDef metrics fill:#e1f5fe,stroke:#0277bd
-    classDef evidence fill:#f3e5f5,stroke:#7b1fa2
-    classDef decision fill:#fff8e1,stroke:#ff8f00
-    classDef final fill:#e8f5e8,stroke:#43a047
-    
-    class T1 metrics
-    class T2 evidence
-    class DP decision
-    class FD1,FD2,FD3,FD4 final
+    API --> VALIDATOR
+    VALIDATOR --> BATCH
+    BATCH --> METRICS
+    BATCH --> EVIDENCE
+    METRICS --> POLICY
+    EVIDENCE --> POLICY
 ```
+
+> For detailed architecture diagrams and component specifications, see [Architecture Guide](docs/ARCHITECTURE.md)
 
 ---
 
@@ -310,72 +452,28 @@ Five orthogonal metrics targeting different AI generation failure modes:
 - **No Evidence**: Fallback to Tier-1 metric status
 
 ### Final Decision Mapping
+
 ```python
+
 # Evidence rules take precedence
 if conclusive_ai_evidence:
     return FinalDecision.CONFIRMED_AI_GENERATED
+
 elif strong_ai_evidence:
     return FinalDecision.SUSPICIOUS_AI_LIKELY
+
 elif strong_authentic_evidence:
     return FinalDecision.MOSTLY_AUTHENTIC
+
 elif conflicting_moderate_evidence:
     return FinalDecision.AUTHENTIC_BUT_REVIEW
 
 # Fallback to Tier-1 metrics
-elif tier1_status == "REVIEW_REQUIRED":
+elif (tier1_status == "REVIEW_REQUIRED"):
     return FinalDecision.SUSPICIOUS_AI_LIKELY
+
 else:
     return FinalDecision.MOSTLY_AUTHENTIC
-```
-
----
-
-## 🏗️ System Architecture
-
-### Component Structure
-
-```bash
-ImageForensics-AI/
-├── app.py                              # FastAPI application
-├── config/
-│   ├── settings.py                     # Environment config
-│   ├── constants.py                    # Enums, parameters, explanations
-│   └── schemas.py                      # Pydantic models
-├── metrics/                            # TIER 1: Statistical detectors
-│   ├── gradient_field_pca.py
-│   ├── frequency_analyzer.py
-│   ├── noise_analyzer.py
-│   ├── texture_analyzer.py
-│   ├── color_analyzer.py
-│   └── signal_aggregator.py            # Metric orchestration
-├── evidence_analyzers/                 # TIER 2: Declarative evidence
-│   ├── exif_analyzer.py
-│   ├── watermark_analyzer.py
-│   └── evidence_aggregator.py          # Evidence orchestration
-├── decision_builders/
-│   └── decision_policy.py              # Evidence-first decision rules
-├── features/
-│   ├── batch_processor.py              # Batch orchestration
-│   ├── threshold_manager.py            # Runtime configuration
-│   └── detailed_result_maker.py        # Explainability extraction
-├── reporter/
-│   ├── csv_reporter.py                 # CSV export
-│   └── json_reporter.py                # JSON API responses
-├── utils/
-│   ├── logger.py                       # Structured logging
-│   ├── image_processor.py              # Image utilities
-│   ├── validators.py                   # File validation
-│   └── helpers.py                      # General utilities
-└── ui/
-    └── index.html                      # Web interface
-```
-
-### Data Flow
-
-```
-Image → Validation → [Tier-1 Metrics + Tier-2 Evidence] → Aggregation → Decision Policy → Final Decision → Reporting
-                      ↗               ↗                                  ↖
-              SignalAggregator  EvidenceAggregator                  DecisionPolicy
 ```
 
 ---
@@ -477,8 +575,10 @@ MAX_WORKERS=4
 ### Runtime Configuration via API
 
 ```python
+
 # Adjust thresholds dynamically
 threshold_manager.set_review_threshold(0.70)
+
 threshold_manager.set_metric_weight(MetricType.GRADIENT, 0.35)
 
 # Get recommendations
@@ -542,7 +642,7 @@ recommendations = threshold_manager.get_recommendations(score=0.85)
 
 ## 📄 License
 
-MIT License - see LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -566,7 +666,9 @@ Data Scientist | AI-ML Practitioner
 ## 🔗 Resources
 
 
-- Documentation: docs/ directory
+- 📖 **API Documentation** - Complete API reference, endpoints, request/response formats
+- 🔬 **Technical Documentation** - Algorithms, mathematical formulations, implementation details  
+- 🏗️ **Architecture Guide** - System architecture, component interactions, data flow diagrams
 
 ---
 
