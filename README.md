@@ -171,7 +171,7 @@ flowchart TD
     Input[📁 Input: Image File<br/>Validated by ImageValidator]
     
     %% Tier 1: Statistical Metrics (Actual Components)
-    subgraph T1 ["Tier 1: Statistical Metrics (metrics/)"]
+    subgraph T1 [Tier 1: Statistical Metrics (metrics/)]
         G[metrics/gradient_field_pca.py]
         F[metrics/frequency_analyzer.py]
         N[metrics/noise_analyzer.py]
@@ -184,7 +184,7 @@ flowchart TD
     Status{LIKELY_AUTHENTIC<br/>or REVIEW_REQUIRED}
     
     %% Tier 2: Declarative Evidence (Actual Components)
-    subgraph T2 ["Tier 2: Declarative Evidence (evidence_analyzers/)"]
+    subgraph T2 [Tier 2: Declarative Evidence (evidence_analyzers/)]
         EX[evidence_analyzers/exif_analyzer.py]
         WM[evidence_analyzers/watermark_analyzer.py]
         EA[evidence_analyzers/evidence_aggregator.py]
@@ -196,7 +196,7 @@ flowchart TD
     DP[decision_builders/decision_policy.py<br/>Evidence-First Decision Policy]
     
     %% Final Decisions
-    FD1[🔴 CONFIRMED_AI_GENERATED<br/>Conclusive evidence<br/>(e.g., cryptographic watermark)]
+    FD1[🔴 CONFIRMED_AI_GENERATED<br/>Conclusive evidence<br/>e.g., cryptographic watermark]
     FD2[🟠 SUSPICIOUS_AI_LIKELY<br/>Strong evidence or high metrics]
     FD3[🟡 AUTHENTIC_BUT_REVIEW<br/>Conflicting/indeterminate evidence]
     FD4[🟢 MOSTLY_AUTHENTIC<br/>Strong authentic evidence]
