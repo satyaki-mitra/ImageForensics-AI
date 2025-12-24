@@ -755,7 +755,9 @@ $$P_{\text{peak}} = \frac{\text{count}(\text{peaks in } R)}{\text{size}(R)}$$
 
 For each color channel $C$:
 
+```math
 $$\text{LSB}(C) = C \& 1$$
+```
 
 Entropy of LSB plane:
 
@@ -867,25 +869,36 @@ Define evidence subsets:
 
 **Rule 1: Conclusive Evidence Override**
 If $\exists e_i \in E_{\text{AI}}$ with $s_i = 4$ and $c_i \geq 0.6$:
+
+```math
 $$D = \text{CONFIRMED\_AI\_GENERATED}$$
+```
 
 **Rule 2: Strong Evidence Dominance**
 Let $S_{\text{AI}} = \max_{e_i \in E_{\text{AI}}} s_i$, $S_{\text{AUTH}} = \max_{e_i \in E_{\text{AUTH}}} s_i$
 
 If $S_{\text{AI}} = 3$ and $S_{\text{AI}} > S_{\text{AUTH}}$:
+
+```math
 $$D = \text{SUSPICIOUS\_AI\_LIKELY}$$
+```
 
 **Rule 3: Conflicting Evidence**
 If $|E_{\text{IND}}| \geq 2$ or $(|E_{\text{AI}}| > 0$ and $|E_{\text{AUTH}}| > 0)$:
+
+```math
 $$D = \text{AUTHENTIC\_BUT\_REVIEW}$$
+```
 
 **Rule 4: Fallback to Tier-1 Metrics**
 If $E = \emptyset$ or no rules above apply:
 
+```math
 $$D = \begin{cases}
 \text{SUSPICIOUS\_AI\_LIKELY} & \text{if } S \geq \tau \\
 \text{MOSTLY\_AUTHENTIC} & \text{if } S < \tau
 \end{cases}$$
+```
 
 ### Implementation Reference
 
@@ -897,10 +910,12 @@ See `decision_builders/decision_policy.py:DecisionPolicy.apply()`
 
 ### Binary Decision Rule for Tier-1 Fallback
 
+```math
 $$D(I) = \begin{cases} 
 \text{SUSPICIOUS\_AI\_LIKELY} & \text{if } S(I) \geq \tau \\
 \text{MOSTLY\_AUTHENTIC} & \text{if } S(I) < \tau
 \end{cases}$$
+```
 
 Default threshold: $\tau = 0.65$
 
