@@ -200,23 +200,20 @@ For each color channel $C \in \{R, G, B\}$:
    
    $$G_x = S_x * C, \quad G_y = S_y * C$$
    
-
    where $S_x, S_y$ are Sobel operators
 
 2. **Construct gradient matrix**:
-   ```math
+   
    $$M = \begin{bmatrix} \text{vec}(G_x) & \text{vec}(G_y) \end{bmatrix}^T$$
-   ```
-
+   
 3. **Perform PCA**:
-   ```math
+   
    $$\text{cov} = M^T M, \quad \text{eigenvalues} = \text{eig}(\text{cov})$$
-   ```
-
+   
 4. **Compute eigenvalue ratio**:
-   ```math
+   
    $$\text{ratio} = \frac{\lambda_2}{\lambda_1 + \lambda_2}$$
-   ```
+   
 
 
 #### b) Frequency Domain Analysis
@@ -224,35 +221,31 @@ For each color channel $C \in \{R, G, B\}$:
 Let $I(x,y)$ be the luminance channel:
 
 1. **Compute 2D FFT**:
-   ```math
+   
    $$F(u,v) = \mathcal{F}\{I(x,y)\}$$
-   ```
+   
 
 2. **Radial spectrum**:
-   ```math
+   
    $$P(r) = \frac{1}{N_r} \sum_{r \leq \sqrt{u^2+v^2} < r+1} |F(u,v)|^2$$
-   ```
+   
 
 3. **High-frequency ratio**:
-   ```math
+  
    $$\text{HF ratio} = \frac{\sum_{r>R_c} P(r)}{\sum_{r} P(r)}$$
-   ```
-
+   
    where $R_c$ is the cutoff radius
 
 #### c) LSB Steganography Detection
 
 For each color channel $C$:
 
-```math
 $$\text{LSB}(C) = C \ \&\ 1$$
-```
+
 
 **Statistical test**:
 
-```math
 $$\chi^2 = \sum_{b=0}^{1} \frac{(H(b) - E)^2}{E}$$
-```
 
 where $H(b)$ is the histogram of LSB values and $E = \frac{H}{2}$
 
