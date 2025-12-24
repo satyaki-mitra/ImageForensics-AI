@@ -12,7 +12,10 @@
 
 ## System Overview
 
-AI Image Screener is a multi-metric ensemble system designed for first-pass screening of potentially AI-generated images in production workflows. The system processes images through five independent statistical detectors, aggregates their outputs, and provides actionable binary decisions with full explainability.
+AI Image Screener is a multi-tier screening system designed for first-pass screening of potentially AI-generated images in production workflows. The system combines quantitative statistical metrics (Tier-1) with declarative evidence analyzers (Tier-2) and resolves them through a deterministic decision policy to produce review-aware, multi-class verdicts with full explainability.
+
+> **The system is explicitly not a ground-truth detector and is designed for human-in-the-loop workflows.**
+
 
 **Design Principles:**
 - No single metric dominates decisions
@@ -20,6 +23,8 @@ AI Image Screener is a multi-metric ensemble system designed for first-pass scre
 - Parallel processing for batch efficiency
 - Zero external ML model dependencies
 - Transparent, auditable decision logic
+- Separation of quantitative metrics and declarative evidence
+- Deterministic policy-based decision resolution
 
 ---
 
@@ -34,58 +39,70 @@ graph TB
     subgraph "API Layer"
         API[FastAPI Server<br/>app.py]
         CORS[CORS Middleware]
-        ERROR[Error Handler]
+        ERROR[Global Error Handler]
     end
     
     subgraph "Processing Layer"
         VALIDATOR[Image Validator<br/>utils/validators.py]
         BATCH[Batch Processor<br/>features/batch_processor.py]
-        THRESH[Threshold Manager<br/>features/threshold_manager.py]
     end
     
-    subgraph "Detection Layer"
-        AGG[Metrics Aggregator<br/>metrics/aggregator.py]
+    subgraph "Detection Layer — Tier 1"
+        AGG[Signal Aggregator<br/>metrics/signal_aggregator.py]
         
         subgraph "Independent Metrics"
-            M1[Gradient PCA<br/>gradient_field_pca.py]
-            M2[Frequency FFT<br/>frequency_analyzer.py]
-            M3[Noise Pattern<br/>noise_analyzer.py]
-            M4[Texture Stats<br/>texture_analyzer.py]
-            M5[Color Distribution<br/>color_analyzer.py]
+            M1[Gradient PCA]
+            M2[Frequency FFT]
+            M3[Noise Pattern]
+            M4[Texture Stats]
+            M5[Color Distribution]
         end
     end
     
+    subgraph "Evidence Layer — Tier 2 (non-scoring)"
+        EVIDENCE_AGG[Evidence Aggregator (Tier-2)<br/>evidence_analyzers/]
+        EXIF[EXIF Analyzer]
+        WM[Watermark Analyzer]
+    end
+    
+    subgraph "Decision Layer"
+        POLICY[Decision Policy Engine<br/>decision_policy.py]
+        DETAIL[Decision Explanation Engine]
+    end
+    
     subgraph "Reporting Layer"
-        DETAIL[DetailedResultMaker<br/>features/detailed_result_maker.py]
         CSV[CSV Reporter]
         JSON[JSON Reporter]
-        PDF[PDF Reporter]
     end
     
     subgraph "Storage Layer"
-        UPLOAD[(Temp Upload<br/>data/uploads/)]
-        CACHE[(Cache<br/>data/cache/)]
-        REPORTS[(Reports<br/>data/reports/)]
+        UPLOAD[(Temp Uploads)]
+        CACHE[(Processing Cache)]
+        REPORTS[(Reports)]
     end
     
     UI --> API
     API --> VALIDATOR
     VALIDATOR --> BATCH
+    API --> ERROR
+    
     BATCH --> AGG
     AGG --> M1 & M2 & M3 & M4 & M5
     M1 & M2 & M3 & M4 & M5 --> AGG
-    AGG --> THRESH
-    THRESH --> DETAIL
-    DETAIL --> CSV & JSON & PDF
+    
+    BATCH --> EVIDENCE_AGG
+    EVIDENCE_AGG --> EXIF & WM
+    
+    AGG --> POLICY
+    EVIDENCE_AGG --> DETAIL
+    EVIDENCE_AGG --> POLICY
+    
+    POLICY --> DETAIL
+    DETAIL --> CSV & JSON
     
     API -.-> UPLOAD
     BATCH -.-> CACHE
-    CSV & JSON & PDF -.-> REPORTS
-    
-    style UI fill:#e1f5ff
-    style API fill:#fff4e1
-    style AGG fill:#ffe1e1
-    style DETAIL fill:#e1ffe1
+    CSV & JSON -.-> REPORTS
 ```
 
 ---
@@ -94,53 +111,52 @@ graph TB
 
 ```mermaid
 flowchart LR
-    subgraph "Input Stage"
+    subgraph "Input"
         A[Image Upload] --> B{Validation}
         B -->|Pass| C[Temp Storage]
-        B -->|Fail| Z1[Error Response]
+        B -->|Fail| X[Error Response]
     end
     
     subgraph "Preprocessing"
-        C --> D[Load Image<br/>RGB Array]
-        D --> E[Resize if Needed<br/>max 1024px]
-        E --> F[Convert to<br/>Luminance]
+        C --> D[Load Image]
+        D --> E[Resize / Normalize]
+        E --> F[Luminance Conversion]
     end
     
-    subgraph "Parallel Metric Execution"
-        F --> G1[Gradient<br/>Analysis]
-        F --> G2[Frequency<br/>Analysis]
-        F --> G3[Noise<br/>Analysis]
-        F --> G4[Texture<br/>Analysis]
-        F --> G5[Color<br/>Analysis]
+    subgraph "Tier 1 — Statistical Metrics"
+        F --> G1[Gradient Analysis]
+        F --> G2[Frequency Analysis]
+        F --> G3[Noise Analysis]
+        F --> G4[Texture Analysis]
+        F --> G5[Color Analysis]
     end
     
-    subgraph "Score Aggregation"
-        G1 --> H[Weighted<br/>Ensemble]
-        G2 --> H
-        G3 --> H
-        G4 --> H
-        G5 --> H
-        H --> I[Overall Score<br/>0.0 - 1.0]
+    subgraph "Metric Aggregation"
+        G1 & G2 & G3 & G4 & G5 --> H[Weighted Ensemble]
+        H --> I[Overall Score<br/>0.0 – 1.0]
+        I --> J[Detection Status]
     end
     
-    subgraph "Decision Logic"
-        I --> J{Score vs<br/>Threshold}
-        J -->|>= 0.65| K1[REVIEW<br/>REQUIRED]
-        J -->|< 0.65| K2[LIKELY<br/>AUTHENTIC]
+    subgraph "Tier 2 — Declarative Evidence"
+        C --> K1[EXIF Analysis]
+        C --> K2[Watermark Analysis]
+        K1 & K2 --> L[Evidence Results]
     end
     
-    subgraph "Output Stage"
-        K1 --> L[Detailed Result<br/>Assembly]
-        K2 --> L
-        L --> M[Signal Status<br/>Per Metric]
-        M --> N[Explainability<br/>Generation]
-        N --> O[Report Export<br/>CSV/JSON/PDF]
+    subgraph "Decision Policy"
+        J --> M[Rule-Based Engine]
+        L --> M
+        M --> V1[Mostly Authentic]
+        M --> V2[Authentic But Review]
+        M --> V3[Suspicious AI Likely]
+        M --> V4[Confirmed AI Generated]
     end
     
-    style B fill:#ffcccc
-    style H fill:#cce5ff
-    style J fill:#ffffcc
-    style O fill:#ccffcc
+    subgraph "Output"
+        M --> N[Detailed Result Assembly]
+        N --> O[Explainability]
+        O --> P[CSV / JSON Export]
+    end
 ```
 
 ---
@@ -164,7 +180,7 @@ classDiagram
         <<enumeration>>
         +MetricType
         +SignalStatus
-        +DetectionStatus
+        +FinalDecision
         +SIGNAL_THRESHOLDS
         +METRIC_EXPLANATIONS
     }
@@ -233,9 +249,24 @@ Texture:   15%
 Color:     10%
 ```
 
+### 3. Evidence Layer (`evidence_analyzers/`)
+
+The Evidence Layer performs Tier-2 analysis using non-scoring, declarative analyzers that inspect metadata and embedded artifacts.
+
+Evidence analyzers do not produce numeric scores. Instead, they emit directional findings that either support authenticity, indicate AI generation, or remain indeterminate.
+
+**Evidence Outputs:**
+- `direction`: AUTHENTIC | AI_GENERATED | INDETERMINATE
+- `finding`: Human-readable explanation
+- `confidence`: Optional (0.0–1.0)
+
+**Current Evidence Analyzers:**
+- EXIF Analyzer — metadata presence, consistency, plausibility
+- Watermark Analyzer — detection of known or statistical AI watermark patterns
+
 ---
 
-### 3. Processing Pipeline
+### 4. Processing Pipeline
 
 ```mermaid
 sequenceDiagram
@@ -243,75 +274,58 @@ sequenceDiagram
     participant API
     participant BatchProcessor
     participant MetricsAggregator
-    participant Metric1
-    participant Metric2
-    participant ThresholdManager
-    participant DetailedResultMaker
+    participant EvidenceAggregator
+    participant DecisionPolicy
+    participant Reporter
     
-    UI->>API: Upload Batch (n images)
+    UI->>API: Upload Images
     API->>BatchProcessor: process_batch()
     
-    loop For Each Image
+    loop For each image
         BatchProcessor->>MetricsAggregator: analyze_image()
-        
-        par Parallel Execution
-            MetricsAggregator->>Metric1: detect()
-            MetricsAggregator->>Metric2: detect()
+        par Metrics
+            MetricsAggregator->>MetricsAggregator: run all detectors
         end
         
-        Metric1-->>MetricsAggregator: MetricResult(score, confidence, details)
-        Metric2-->>MetricsAggregator: MetricResult(score, confidence, details)
+        BatchProcessor->>EvidenceAggregator: analyze(image_path)
+        EvidenceAggregator-->>BatchProcessor: evidence[]
         
-        MetricsAggregator->>MetricsAggregator: _aggregate_scores()
-        MetricsAggregator->>ThresholdManager: _determine_status()
-        ThresholdManager-->>MetricsAggregator: DetectionStatus
+        MetricsAggregator-->>DecisionPolicy: metric results + status
+        EvidenceAggregator-->>DecisionPolicy: evidence results
         
-        MetricsAggregator-->>BatchProcessor: AnalysisResult
-        BatchProcessor->>UI: Progress Update
+        DecisionPolicy-->>BatchProcessor: final decision
+        BatchProcessor-->>UI: progress update
     end
     
-    BatchProcessor->>DetailedResultMaker: extract_detailed_results()
-    DetailedResultMaker-->>BatchProcessor: Detailed Report Data
-    
-    BatchProcessor-->>API: BatchAnalysisResult
-    API-->>UI: JSON Response + batch_id
+    BatchProcessor->>Reporter: generate reports
+    Reporter-->>API: BatchAnalysisResult
+    API-->>UI: JSON response
 ```
 
 ---
 
-### 4. Metric Execution Detail
+### 5. Metric Execution Detail
 
 ```mermaid
 flowchart TB
-    subgraph "Single Metric Execution"
-        A[Input: RGB Image<br/>H×W×3] --> B[Preprocessing<br/>Normalization/Conversion]
-        
-        B --> C[Feature Extraction]
-        
-        C --> D1[Sub-metric 1]
-        C --> D2[Sub-metric 2]
-        C --> D3[Sub-metric 3]
-        
-        D1 --> E[Sub-score 1<br/>0.0 - 1.0]
-        D2 --> F[Sub-score 2<br/>0.0 - 1.0]
-        D3 --> G[Sub-score 3<br/>0.0 - 1.0]
-        
-        E --> H[Weighted Combination]
-        F --> H
-        G --> H
-        
-        H --> I[Final Metric Score]
-        I --> J[Confidence Calculation]
-        
-        J --> K[MetricResult Object]
-        K --> L{Valid?}
-        L -->|Yes| M[Return to Aggregator]
-        L -->|No| N[Return Neutral Score<br/>0.5 + 0 confidence]
-    end
+    A[RGB Image] --> B[Preprocessing]
+    B --> C[Feature Extraction]
     
-    style A fill:#e1f5ff
-    style I fill:#ffe1e1
-    style K fill:#e1ffe1
+    C --> D1[Sub-metric A]
+    C --> D2[Sub-metric B]
+    C --> D3[Sub-metric C]
+    
+    D1 --> E1[Score A]
+    D2 --> E2[Score B]
+    D3 --> E3[Score C]
+    
+    E1 & E2 & E3 --> F[Weighted Metric Score]
+    F --> G[Confidence Estimation]
+    G --> H[MetricResult]
+    H --> I{Valid?}
+    
+    I -->|Yes| J[Return Result]
+    I -->|No| K[Neutral Output]
 ```
 
 **Example: Noise Analysis Sub-metrics**
@@ -325,46 +339,39 @@ flowchart TB
 
 ```mermaid
 graph TB
-    subgraph "User Interfaces"
-        WEB[Web UI<br/>Browser-based]
-        API_CLIENT[API Clients<br/>Programmatic Access]
+    subgraph "Interfaces"
+        WEB[Web UI]
+        API_CLIENT[API Clients]
     end
     
     subgraph "Core Engine"
-        SCREEN[Screening Engine<br/>Multi-metric Ensemble]
-        THRESH_MGR[Threshold Manager<br/>Sensitivity Control]
+        METRICS[Tier-1 Metrics Engine]
+        EVIDENCE[Tier-2 Evidence Engine]
+        POLICY[Decision Policy]
     end
     
-    subgraph "Reporting System"
+    subgraph "Reporting"
         DETAIL[Detailed Analysis]
-        EXPORT[Multi-format Export<br/>CSV/JSON/PDF]
+        EXPORT[CSV / JSON Export]
     end
     
     subgraph "Use Cases"
-        UC1[Content Moderation<br/>Pipelines]
-        UC2[Journalism<br/>Verification]
-        UC3[Stock Photo<br/>Platforms]
-        UC4[Legal/Compliance<br/>Workflows]
+        UC1[Moderation Pipelines]
+        UC2[Journalism Verification]
+        UC3[Stock Media Review]
+        UC4[Compliance Workflows]
     end
     
-    WEB --> SCREEN
-    API_CLIENT --> SCREEN
+    WEB --> METRICS
+    API_CLIENT --> METRICS
     
-    SCREEN --> THRESH_MGR
-    THRESH_MGR --> DETAIL
+    METRICS --> POLICY
+    EVIDENCE --> POLICY
+    
+    POLICY --> DETAIL
     DETAIL --> EXPORT
     
-    EXPORT -.->|Feeds| UC1
-    EXPORT -.->|Feeds| UC2
-    EXPORT -.->|Feeds| UC3
-    EXPORT -.->|Feeds| UC4
-    
-    style SCREEN fill:#ff6b6b
-    style EXPORT fill:#4ecdc4
-    style UC1 fill:#ffe66d
-    style UC2 fill:#ffe66d
-    style UC3 fill:#ffe66d
-    style UC4 fill:#ffe66d
+    EXPORT -.-> UC1 & UC2 & UC3 & UC4
 ```
 
 ---
@@ -389,7 +396,6 @@ graph LR
     end
     
     subgraph "Reporting"
-        R1[ReportLab PDF]
         R2[CSV stdlib]
         R3[JSON stdlib]
     end
@@ -409,7 +415,6 @@ graph LR
     F1 --> F2
     F2 --> F3
     
-    R1 --> B1
     R2 --> B1
     R3 --> B1
     
@@ -428,7 +433,6 @@ graph LR
 - **NumPy/SciPy**: Numerical computation
 - **OpenCV**: Image processing and filtering
 - **Pillow**: Image loading and validation
-- **ReportLab**: PDF generation
 - **Pydantic**: Data validation and serialization
 
 ---
@@ -466,41 +470,33 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph "Production Deployment"
-        LB[Load Balancer<br/>Nginx/Traefik]
-        
-        subgraph "Application Servers"
-            APP1[FastAPI Instance 1<br/>4 workers]
-            APP2[FastAPI Instance 2<br/>4 workers]
-        end
-        
-        subgraph "Shared Storage"
-            NFS[Shared NFS Mount<br/>reports/ cache/]
-        end
-        
-        subgraph "Monitoring"
-            LOGS[Log Aggregation<br/>ELK/Loki]
-            METRICS[Metrics<br/>Prometheus]
-        end
+    CLIENT[Clients] --> LB[Load Balancer]
+    
+    subgraph "Application Tier"
+        APP1[FastAPI Instance]
+        APP2[FastAPI Instance]
     end
     
-    CLIENT[Clients] --> LB
+    subgraph "Storage"
+        FS[File Storage<br/>uploads / reports]
+    end
+    
+    subgraph "Observability"
+        LOGS[Central Logs]
+        METRICS[Metrics]
+    end
+    
     LB --> APP1
     LB --> APP2
     
-    APP1 -.-> NFS
-    APP2 -.-> NFS
+    APP1 -.-> FS
+    APP2 -.-> FS
     
     APP1 -.-> LOGS
     APP2 -.-> LOGS
     
     APP1 -.-> METRICS
     APP2 -.-> METRICS
-    
-    style LB fill:#4ecdc4
-    style APP1 fill:#ff6b6b
-    style APP2 fill:#ff6b6b
-    style NFS fill:#95e1d3
 ```
 
 **Recommended Setup:**

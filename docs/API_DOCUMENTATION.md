@@ -3,9 +3,10 @@
 ## Base Information
 
 **Base URL**: `http://localhost:8005`  
-**API Version**: `1.0.0`  
+**API Version**: `2.0.0`  
 **Protocol**: HTTP/HTTPS  
-**Content Type**: `application/json` (default)
+**Content Type**: `application/json` (default)  
+**Architecture**: Two-tier evidence-first decision system
 
 ---
 
@@ -20,6 +21,8 @@
 7. [Error Handling](#error-handling)
 8. [Rate Limits](#rate-limits)
 9. [Data Models](#data-models)
+10. [Evidence-First Decision Policy](#evidence-first-decision-policy)
+11. [Usage Examples](#usage-examples)
 
 ---
 
@@ -28,6 +31,7 @@
 **Current Version**: No authentication required (intended for internal deployment)
 
 **Future Versions**: API key authentication planned
+
 ```bash
 # Planned header format
 Authorization: Bearer <api_key>
@@ -84,43 +88,28 @@ curl -X POST http://localhost:8005/analyze/image \
   "data": {
     "filename": "example.jpg",
     "status": "REVIEW_REQUIRED",
+    "final_decision": "SUSPICIOUS_AI_LIKELY",
+    "decision_explanation": "Strong AI evidence detected in metadata analysis",
     "overall_score": 0.73,
     "confidence": 73,
+    "evidence": [
+      {
+        "source": "exif",
+        "finding": "AI software fingerprint detected in EXIF data",
+        "direction": "ai_generated",
+        "strength": "strong",
+        "confidence": 0.92,
+        "analyzer": "exif_analyzer",
+        "timestamp": "2024-12-19T14:32:15.123456"
+      }
+    ],
     "signals": [
       {
         "name": "Gradient Field PCA",
         "metric_type": "gradient",
         "score": 0.81,
         "status": "flagged",
-        "explanation": "Detected irregular gradient patterns typical of diffusion models. Natural photos show consistent lighting gradients shaped by physics."
-      },
-      {
-        "name": "Frequency Analysis",
-        "metric_type": "frequency",
-        "score": 0.68,
-        "status": "warning",
-        "explanation": "Frequency patterns show some irregularities. Requires further review."
-      },
-      {
-        "name": "Noise Analysis",
-        "metric_type": "noise",
-        "score": 0.72,
-        "status": "flagged",
-        "explanation": "Noise pattern is unnaturally uniform. Real camera sensors produce characteristic noise patterns."
-      },
-      {
-        "name": "Texture Analysis",
-        "metric_type": "texture",
-        "score": 0.65,
-        "status": "warning",
-        "explanation": "Some texture regions appear overly uniform. Further analysis recommended."
-      },
-      {
-        "name": "Color Analysis",
-        "metric_type": "color",
-        "score": 0.54,
-        "status": "warning",
-        "explanation": "Some color histogram irregularities detected."
+        "explanation": "Detected irregular gradient patterns..."
       }
     ],
     "metric_results": {
@@ -130,61 +119,7 @@ curl -X POST http://localhost:8005/analyze/image \
         "confidence": 0.87,
         "details": {
           "eigenvalue_ratio": 0.72,
-          "gradient_vectors_sampled": 10000,
-          "threshold": 0.85
-        }
-      },
-      "frequency": {
-        "metric_type": "frequency",
-        "score": 0.68,
-        "confidence": 0.65,
-        "details": {
-          "hf_ratio": 0.38,
-          "hf_anomaly": 0.45,
-          "roughness": 0.032,
-          "spectral_deviation": 0.21
-        }
-      },
-      "noise": {
-        "metric_type": "noise",
-        "score": 0.72,
-        "confidence": 0.78,
-        "details": {
-          "mean_noise": 1.12,
-          "cv": 0.18,
-          "patches_valid": 42,
-          "patches_total": 100
-        }
-      },
-      "texture": {
-        "metric_type": "texture",
-        "score": 0.65,
-        "confidence": 0.71,
-        "details": {
-          "smooth_ratio": 0.45,
-          "contrast_mean": 18.3,
-          "entropy_mean": 4.2,
-          "patches_used": 50
-        }
-      },
-      "color": {
-        "metric_type": "color",
-        "score": 0.54,
-        "confidence": 0.58,
-        "details": {
-          "saturation_stats": {
-            "mean_saturation": 0.68,
-            "high_sat_ratio": 0.23,
-            "very_high_sat_ratio": 0.06
-          },
-          "histogram_stats": {
-            "roughness_mean": 0.021,
-            "channels_analyzed": 3
-          },
-          "hue_stats": {
-            "top3_concentration": 0.58,
-            "gap_ratio": 0.32
-          }
+          "gradient_vectors_sampled": 10000
         }
       }
     },
@@ -196,13 +131,30 @@ curl -X POST http://localhost:8005/analyze/image \
 }
 ```
 
-**Status Values**
-- `LIKELY_AUTHENTIC`: Score < 0.65 (default threshold)
-- `REVIEW_REQUIRED`: Score >= 0.65
+**Final Decision Values**
+
+- `CONFIRMED_AI_GENERATED`: Conclusive evidence of AI generation
+
+- `SUSPICIOUS_AI_LIKELY`: Strong evidence or high statistical metrics
+
+- `AUTHENTIC_BUT_REVIEW`: Conflicting or weak evidence
+
+- `MOSTLY_AUTHENTIC`: Strong authentic evidence
+
+
+**Status Values (Tier-1 only)**
+
+- `LIKELY_AUTHENTIC`: Statistical score < 0.65
+
+- `REVIEW_REQUIRED`: Statistical score >= 0.65
+
 
 **Signal Status Values**
+
 - `passed`: Score < 0.40
+
 - `warning`: Score >= 0.40 and < 0.70
+
 - `flagged`: Score >= 0.70
 
 ---
@@ -244,40 +196,22 @@ curl -X POST http://localhost:8005/analyze/batch \
         {
           "filename": "image1.jpg",
           "status": "REVIEW_REQUIRED",
+          "final_decision": "SUSPICIOUS_AI_LIKELY",
+          "decision_explanation": "Strong evidence detected...",
           "overall_score": 0.73,
           "confidence": 73,
-          "signals": [...],
-          "metric_results": {...},
+          "evidence": [],
+          "signals": [],
           "processing_time": 2.1,
           "image_size": [1920, 1080],
           "timestamp": "2024-12-19T14:32:15.123456"
-        },
-        {
-          "filename": "image2.png",
-          "status": "LIKELY_AUTHENTIC",
-          "overall_score": 0.42,
-          "confidence": 42,
-          "signals": [...],
-          "metric_results": {...},
-          "processing_time": 2.3,
-          "image_size": [2048, 1536],
-          "timestamp": "2024-12-19T14:32:17.234567"
-        },
-        {
-          "filename": "image3.webp",
-          "status": "LIKELY_AUTHENTIC",
-          "overall_score": 0.38,
-          "confidence": 38,
-          "signals": [...],
-          "metric_results": {...},
-          "processing_time": 1.9,
-          "image_size": [1024, 768],
-          "timestamp": "2024-12-19T14:32:19.345678"
         }
       ],
       "summary": {
-        "likely_authentic": 2,
-        "review_required": 1,
+        "CONFIRMED_AI_GENERATED": 0,
+        "SUSPICIOUS_AI_LIKELY": 1,
+        "AUTHENTIC_BUT_REVIEW": 1,
+        "MOSTLY_AUTHENTIC": 1,
         "success_rate": 100,
         "processed": 3,
         "failed": 0,
@@ -340,8 +274,8 @@ curl -X GET http://localhost:8005/batch/550e8400-e29b-41d4-a716-446655440000/pro
     "total_images": 10,
     "processed": 10,
     "failed": 0,
-    "results": [...],
-    "summary": {...},
+    "results": [],
+    "summary": {},
     "total_processing_time": 21.4,
     "timestamp": "2024-12-19T14:35:22.123456"
   }
@@ -387,49 +321,31 @@ curl -X GET http://localhost:8005/report/csv/550e8400-e29b-41d4-a716-44665544000
 - Includes: per-image results, metric breakdowns, forensic details
 
 **CSV Structure**
-```
-BATCH STATISTICS
+
+```text
+BATCH DECISION STATISTICS
 Total Images,10
-Successfully Processed,10
+Processed,10
 Failed,0
-...
+CONFIRMED_AI_GENERATED,2
+SUSPICIOUS_AI_LIKELY,3
+AUTHENTIC_BUT_REVIEW,3
+MOSTLY_AUTHENTIC,2
 
 ANALYSIS RESULTS
-Filename,Status,Overall Score,Confidence,Processing Time
-image1.jpg,REVIEW_REQUIRED,0.73,73,2.1
-image2.png,LIKELY_AUTHENTIC,0.42,42,2.3
-...
+Filename,Final Decision,Decision Confidence (%),Overall Score,Decision Explanation,Processing Time (s)
+image1.jpg,SUSPICIOUS_AI_LIKELY,73,0.73,Strong evidence detected...,2.1
 
 IMAGE 1 DETAILED ANALYSIS
-Metric Name,Score,Status,Explanation
-Gradient Field PCA,0.81,flagged,Detected irregular gradient patterns...
-...
+FINAL DECISION
+Decision,SUSPICIOUS_AI_LIKELY
+Confidence,73%
+Explanation,Strong evidence detected...
+
+EVIDENCE SUMMARY
+Source,Direction,Strength,Confidence,Finding
+exif,ai_generated,strong,0.92,AI software fingerprint detected
 ```
-
----
-
-### PDF Export
-
-#### `GET /report/pdf/{batch_id}` or `POST /report/pdf/{batch_id}`
-
-Download detailed batch analysis as PDF report.
-
-**Request**
-
-```bash
-curl -X GET http://localhost:8005/report/pdf/550e8400-e29b-41d4-a716-446655440000 \
-  -o report.pdf
-```
-
-**Response**
-
-- Content-Type: `application/pdf`
-- Professional formatted report with:
-  - Executive summary
-  - Per-image analysis sections
-  - Visual metric breakdowns
-  - Forensic details
-  - Recommendations
 
 ---
 
@@ -517,14 +433,52 @@ All errors return a standardized JSON structure:
 
 ## Data Models
 
-### MetricResult
+### APIResponse
 
 ```typescript
 {
-  metric_type: "gradient" | "frequency" | "noise" | "texture" | "color",
-  score: number,        // 0.0 - 1.0
-  confidence: number,   // 0.0 - 1.0
-  details: object       // Metric-specific forensic data
+  success: boolean,
+  message: string,
+  data: object | null,
+  error: string | null,
+  timestamp: string
+}
+```
+
+### AnalysisResult
+
+```typescript
+{
+  filename: string,
+  status: "LIKELY_AUTHENTIC" | "REVIEW_REQUIRED",
+  final_decision: "CONFIRMED_AI_GENERATED" | "SUSPICIOUS_AI_LIKELY" | 
+                  "AUTHENTIC_BUT_REVIEW" | "MOSTLY_AUTHENTIC" | null,
+  decision_explanation: string | null,
+  overall_score: number,      // 0.0 - 1.0
+  confidence: number,         // 0 - 100
+  signals: DetectionSignal[],
+  evidence: EvidenceResult[],
+  metric_results: {
+    [key: string]: MetricResult
+  },
+  processing_time: number,    // seconds
+  image_size: [number, number],
+  timestamp: string
+}
+```
+
+### EvidenceResult
+
+```typescript
+{
+  source: "exif" | "watermark",
+  finding: string,
+  direction: "ai_generated" | "authentic" | "indeterminate",
+  strength: "weak" | "moderate" | "strong" | "conclusive",
+  confidence: number | null,   // 0.0 - 1.0
+  details: object,
+  analyzer: string,
+  timestamp: string
 }
 ```
 
@@ -540,21 +494,14 @@ All errors return a standardized JSON structure:
 }
 ```
 
-### AnalysisResult
+### MetricResult
 
 ```typescript
 {
-  filename: string,
-  status: "LIKELY_AUTHENTIC" | "REVIEW_REQUIRED",
-  overall_score: number,      // 0.0 - 1.0
-  confidence: number,         // 0 - 100
-  signals: DetectionSignal[],
-  metric_results: {
-    [key: string]: MetricResult
-  },
-  processing_time: number,    // seconds
-  image_size: [number, number],
-  timestamp: string           // ISO 8601 format
+  metric_type: "gradient" | "frequency" | "noise" | "texture" | "color",
+  score: number,        // 0.0 - 1.0
+  confidence: number,   // 0.0 - 1.0
+  details: object       // Metric-specific forensic data
 }
 ```
 
@@ -567,9 +514,11 @@ All errors return a standardized JSON structure:
   failed: number,
   results: AnalysisResult[],
   summary: {
-    likely_authentic: number,
-    review_required: number,
-    success_rate: number,     // percentage
+    CONFIRMED_AI_GENERATED: number,
+    SUSPICIOUS_AI_LIKELY: number,
+    AUTHENTIC_BUT_REVIEW: number,
+    MOSTLY_AUTHENTIC: number,
+    success_rate: number,
     processed: number,
     failed: number,
     avg_score: number,
@@ -580,6 +529,33 @@ All errors return a standardized JSON structure:
   timestamp: string
 }
 ```
+
+---
+
+## Evidence-First Decision Policy
+
+### Decision Hierarchy
+
+- Conclusive Evidence → CONFIRMED_AI_GENERATED
+
+- Strong AI Evidence → SUSPICIOUS_AI_LIKELY
+
+- Strong Authentic Evidence → MOSTLY_AUTHENTIC
+
+- Conflicting/Weak Evidence → AUTHENTIC_BUT_REVIEW
+
+- No Evidence → Fallback to statistical metrics
+
+
+### Evidence Strength Definitions
+
+- CONCLUSIVE: Cryptographic proof, signed metadata
+
+- STRONG: Clear AI fingerprints, consistent patterns
+
+- MODERATE: Suggestive indicators, plausible patterns
+
+- WEAK: Heuristic hints, non-binding observations
 
 ---
 
@@ -597,14 +573,12 @@ with open('image.jpg', 'rb') as f:
         files={'file': f}
     )
     result = response.json()
-    print(f"Status: {result['data']['status']}")
-    print(f"Score: {result['data']['overall_score']}")
+    print(f"Final Decision: {result['data']['final_decision']}")
 
 # Batch analysis
 files = [
     ('files', open('img1.jpg', 'rb')),
-    ('files', open('img2.png', 'rb')),
-    ('files', open('img3.webp', 'rb'))
+    ('files', open('img2.png', 'rb'))
 ]
 response = requests.post(
     'http://localhost:8005/analyze/batch',
@@ -612,6 +586,9 @@ response = requests.post(
 )
 batch_result = response.json()
 batch_id = batch_result['data']['batch_id']
+
+# Check progress
+progress = requests.get(f'http://localhost:8005/batch/{batch_id}/progress').json()
 
 # Download CSV report
 csv_response = requests.get(f'http://localhost:8005/report/csv/{batch_id}')
@@ -634,34 +611,21 @@ axios.post('http://localhost:8005/analyze/image', form, {
   headers: form.getHeaders()
 })
 .then(response => {
-  console.log('Status:', response.data.data.status);
-  console.log('Score:', response.data.data.overall_score);
-})
-.catch(error => {
-  console.error('Error:', error.response.data);
+  console.log('Final Decision:', response.data.data.final_decision);
+  console.log('Evidence found:', response.data.data.evidence.length);
 });
 
-// Batch analysis
-const batchForm = new FormData();
-batchForm.append('files', fs.createReadStream('img1.jpg'));
-batchForm.append('files', fs.createReadStream('img2.png'));
-
-axios.post('http://localhost:8005/analyze/batch', batchForm, {
-  headers: batchForm.getHeaders()
-})
-.then(response => {
-  const batchId = response.data.data.batch_id;
-  console.log('Batch ID:', batchId);
+// Batch progress tracking
+async function trackProgress(batchId) {
+  const response = await axios.get(`http://localhost:8005/batch/${batchId}/progress`);
+  console.log(`Progress: ${response.data.progress.current}/${response.data.progress.total}`);
   
-  // Download PDF report
-  return axios.get(`http://localhost:8005/report/pdf/${batchId}`, {
-    responseType: 'arraybuffer'
-  });
-})
-.then(pdfResponse => {
-  fs.writeFileSync('report.pdf', pdfResponse.data);
-  console.log('Report downloaded');
-});
+  if (response.data.status === 'processing') {
+    setTimeout(() => trackProgress(batchId), 1000);
+  } else if (response.data.status === 'completed') {
+    console.log('Batch completed!');
+  }
+}
 ```
 
 ### cURL
@@ -670,21 +634,20 @@ axios.post('http://localhost:8005/analyze/batch', batchForm, {
 # Single image
 curl -X POST http://localhost:8005/analyze/image \
   -F "file=@image.jpg" \
-  | jq '.data.status, .data.overall_score'
+  | jq '.data.final_decision, .data.evidence[].finding'
 
-# Batch processing
+# Batch analysis
 curl -X POST http://localhost:8005/analyze/batch \
   -F "files=@img1.jpg" \
   -F "files=@img2.png" \
-  -F "files=@img3.webp" \
   | jq '.data.batch_id'
 
 # Progress tracking
-curl -X GET http://localhost:8005/batch/{batch_id}/progress
+curl -X GET http://localhost:8005/batch/{batch_id}/progress \
+  | jq '.status, .progress'
 
-# Download reports
+# CSV report
 curl -X GET http://localhost:8005/report/csv/{batch_id} -o report.csv
-curl -X GET http://localhost:8005/report/pdf/{batch_id} -o report.pdf
 ```
 
 ---
@@ -692,18 +655,29 @@ curl -X GET http://localhost:8005/report/pdf/{batch_id} -o report.pdf
 ## Changelog
 
 ### Version 1.0.0 (Current)
-- Initial API release
-- Single and batch image analysis
-- CSV, JSON, PDF export
-- Progress tracking
-- Multi-metric ensemble detection
+
+- Two-tier evidence-first architecture
+
+- Four-class final decisions
+
+- EXIF and watermark evidence analysis
+
+- Decision policy engine
+
+- Enhanced reporting with evidence
+
 
 ### Planned Features
+
+- C2PA provenance analyzer
+
 - API key authentication
-- Webhook callbacks for async processing
-- Custom threshold configuration per request
-- Historical analysis lookup
-- Metrics-only API endpoints
+
+- Webhook callbacks
+
+- Custom threshold configuration
+
+- Real-time streaming API
 
 ---
 

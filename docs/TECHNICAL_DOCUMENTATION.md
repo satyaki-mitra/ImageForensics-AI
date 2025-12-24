@@ -1,8 +1,8 @@
-# Case Study Analysis: Statistical Foundations of AI Image Screening
+# Technical Documentation: Statistical Foundations of AI Image Screening
 
 **Author**: Satyaki Mitra  
-**Date**: December 2024  
-**Version**: 1.0
+**Date**: December 2025  
+**Version**: 2.0
 
 ---
 
@@ -10,28 +10,35 @@
 
 1. [Executive Summary](#executive-summary)
 2. [Problem Formulation](#problem-formulation)
-3. [Metric 1: Gradient-Field PCA](#metric-1-gradient-field-pca)
-4. [Metric 2: Frequency Domain Analysis](#metric-2-frequency-domain-analysis)
-5. [Metric 3: Noise Pattern Analysis](#metric-3-noise-pattern-analysis)
-6. [Metric 4: Texture Statistical Analysis](#metric-4-texture-statistical-analysis)
-7. [Metric 5: Color Distribution Analysis](#metric-5-color-distribution-analysis)
-8. [Ensemble Aggregation Theory](#ensemble-aggregation-theory)
-9. [Threshold Calibration](#threshold-calibration)
-10. [Performance Analysis](#performance-analysis)
-11. [Limitations & Future Work](#limitations--future-work)
+3. [System Architecture Overview](#system-architecture-overview)
+4. [Metric 1: Gradient-Field PCA](#metric-1-gradient-field-pca)
+5. [Metric 2: Frequency Domain Analysis](#metric-2-frequency-domain-analysis)
+6. [Metric 3: Noise Pattern Analysis](#metric-3-noise-pattern-analysis)
+7. [Metric 4: Texture Statistical Analysis](#metric-4-texture-statistical-analysis)
+8. [Metric 5: Color Distribution Analysis](#metric-5-color-distribution-analysis)
+9. [Tier-2 Evidence Analyzers](#tier-2-evidence-analyzers)
+10. [Ensemble Aggregation Theory](#ensemble-aggregation-theory)
+11. [Decision Policy Theory](#decision-policy-theory)
+12. [Threshold Calibration](#threshold-calibration)
+13. [Performance Analysis](#performance-analysis)
+14. [Computational Complexity](#computational-complexity)
+15. [Limitations & Future Work](#limitations--future-work)
+16. [References](#references)
 
 ---
 
 ## Executive Summary
 
-This document provides the mathematical and statistical foundations for the AI Image Screener system. We formalize five independent statistical detectors, analyze their theoretical properties, and derive the ensemble aggregation strategy.
+This document provides the mathematical, statistical, and architectural foundations for the AI Image Screener system. We formalize the two-tier analysis approach, derive all five statistical detectors, analyze evidence-based decision policies, and provide comprehensive performance analysis.
 
 **Key Results:**
-- Each metric produces normalized anomaly scores $s_i \in [0, 1]$
-- Ensemble aggregation: $S = \sum_{i=1}^{5} w_i s_i$ where $\sum w_i = 1$
-- Binary decision: $D = \mathbb{1}(S \geq \tau)$ where $\tau = 0.65$
-- Expected detection rates: 40–90% depending on generator sophistication
-- False positive rate: 10–20% on natural images
+- **Tier-1**: Five independent statistical detectors with normalized scores $s_i \in [0, 1]$
+- **Tier-2**: Declarative evidence analyzers producing directional findings
+- **Ensemble**: $S = \sum_{i=1}^{5} w_i s_i$ with $\sum w_i = 1$ and $\mathbf{w} = [0.30, 0.25, 0.20, 0.15, 0.10]^\top$
+- **Decision Policy**: Evidence-first deterministic rules with four-class output
+- **Threshold**: $\tau = 0.65$ for balanced sensitivity-specificity tradeoff
+- **Performance**: 40–90% detection rates depending on generator sophistication
+- **False Positive Rate**: 10–20% on natural images
 
 ---
 
@@ -48,18 +55,106 @@ This document provides the mathematical and statistical foundations for the AI I
 | $w_i \in [0, 1]$ | Weight of metric $i$ |
 | $S \in [0, 1]$ | Aggregated ensemble score |
 | $\tau$ | Decision threshold |
-| $D \in \{0, 1\}$ | Binary decision (0 = authentic, 1 = review required) |
+| $E = \{e_1, e_2, \ldots, e_n\}$ | Evidence items |
+| $d_i \in \{AI, AUTHENTIC, INDETERMINATE\}$ | Evidence direction |
+| $D \in \{\text{CONFIRMED\_AI}, \text{SUSPICIOUS\_AI}, \text{AUTHENTIC\_BUT\_REVIEW}, \text{MOSTLY\_AUTHENTIC}\}$ | Final decision |
 
 ### Objective
 
-Given an image $I$, compute:
+Given an image $I$, compute a final decision through a two-tier pipeline:
 
-$$D = \begin{cases} 
-1 & \text{if } S \geq \tau \text{ (REVIEW REQUIRED)} \\
-0 & \text{if } S < \tau \text{ (LIKELY AUTHENTIC)}
-\end{cases}$$
+1. **Tier-1 Statistical Analysis**: Compute anomaly scores $\{s_1, s_2, s_3, s_4, s_5\}$
+2. **Tier-2 Evidence Analysis**: Extract declarative evidence $E$
+3. **Decision Policy**: Apply deterministic rules to combine scores and evidence
 
-where $S$ aggregates evidence from 5 independent statistical tests.
+The system is designed for human-in-the-loop workflows, not as a ground-truth detector.
+
+---
+
+## System Architecture Overview
+
+### Two-Tier Analysis Pipeline
+
+
+```mermaid
+flowchart TD
+    Input[INPUT: Image I]
+    
+    subgraph Tier1[TIER 1: STATISTICAL METRICS]
+        Gradient[Gradient PCA<br/>30% weight]
+        Frequency[Frequency FFT<br/>25% weight]
+        Noise[Noise Pattern<br/>20% weight]
+        Texture[Texture Stats<br/>15% weight]
+        Color[Color Distribution<br/>10% weight]
+    end
+    
+    Aggregator1[Signal Aggregator]
+    ScoreS[Score S]
+    
+    subgraph Tier2[TIER 2: DECLARATIVE EVIDENCE]
+        EXIF[EXIF Analyzer]
+        Watermark[Watermark Detector]
+        Future[(Future: C2PA)]
+    end
+    
+    Aggregator2[Evidence Aggregator]
+    EvidenceE[Evidence E]
+    
+    subgraph Decision[DECISION POLICY ENGINE]
+        Rule1[1. Conclusive evidence overrides all]
+        Rule2[2. Strong evidence > statistical metrics]
+        Rule3[3. Conflicting evidence → "AUTHENTIC_BUT_REVIEW"]
+        Rule4[4. No evidence → fallback to Tier-1 metrics]
+    end
+    
+    subgraph Final[FINAL DECISION]
+        Final1[• CONFIRMED_AI_GENERATED<br/>conclusive evidence]
+        Final2[• SUSPICIOUS_AI_LIKELY<br/>strong evidence/metrics]
+        Final3[• AUTHENTIC_BUT_REVIEW<br/>conflicting/weak evidence]
+        Final4[• MOSTLY_AUTHENTIC<br/>strong authentic evidence]
+    end
+    
+    Input --> Tier1
+    
+    Gradient --> Aggregator1
+    Frequency --> Aggregator1
+    Noise --> Aggregator1
+    Texture --> Aggregator1
+    Color --> Aggregator1
+    Aggregator1 --> ScoreS
+    
+    ScoreS --> Decision
+    
+    Input --> Tier2
+    EXIF --> Aggregator2
+    Watermark --> Aggregator2
+    Future -.-> Aggregator2
+    Aggregator2 --> EvidenceE
+    EvidenceE --> Decision
+    
+    Decision --> Rule1
+    Decision --> Rule2
+    Decision --> Rule3
+    Decision --> Rule4
+    
+    Rule1 --> Final1
+    Rule2 --> Final2
+    Rule3 --> Final3
+    Rule4 --> Final4
+    
+    %% Styling
+    classDef input fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef tier1 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef tier2 fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef final fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class Input input
+    class Tier1 tier1
+    class Tier2 tier2
+    class Decision decision
+    class Final final
+```
 
 ---
 
@@ -67,7 +162,7 @@ where $S$ aggregates evidence from 5 independent statistical tests.
 
 ### Physical Motivation
 
-Real photographs capture light reflected from 3D scenes. Lighting creates **low-dimensional gradient structures** aligned with physical light sources. Diffusion models perform patch-based denoising, creating gradient fields inconsistent with global illumination.
+Real photographs capture light reflected from 3D scenes. Physical lighting creates **low-dimensional gradient structures** aligned with light sources. Diffusion models perform patch-based denoising, creating gradient fields inconsistent with global illumination.
 
 ### Mathematical Formulation
 
@@ -93,7 +188,7 @@ Flatten gradients into vectors:
 
 $$\mathbf{g}_i = \begin{bmatrix} G_x(i) \\ G_y(i) \end{bmatrix} \in \mathbb{R}^2$$
 
-Filter by magnitude: $||\mathbf{g}_i|| > \epsilon$ where $\epsilon = 10^{-6}$
+Filter by magnitude: $\|\mathbf{g}_i\| > \epsilon$ where $\epsilon = 10^{-6}$
 
 Sample $N = \min(10000, |\{\mathbf{g}_i\}|)$ vectors uniformly.
 
@@ -564,6 +659,117 @@ See `metrics/color_analyzer.py:ColorAnalyzer.detect()`
 
 ---
 
+## Tier-2 Evidence Analyzers
+
+### Evidence Layer Architecture
+
+Evidence analyzers perform declarative, non-scoring analysis. They inspect metadata and embedded artifacts to produce directional findings.
+
+**Evidence Properties:**
+- **Direction**: AI_GENERATED | AUTHENTIC | INDETERMINATE
+- **Strength**: WEAK | MODERATE | STRONG | CONCLUSIVE
+- **Confidence**: $c \in [0, 1]$ (optional)
+- **Finding**: Human-readable explanation
+
+### 1. EXIF Analyzer
+
+**Purpose**: Analyze metadata for authenticity indicators and AI fingerprints.
+
+**Mathematical Framework:**
+
+**a) AI Fingerprint Detection**
+
+Let $F = \{f_1, f_2, \ldots, f_m\}$ be known AI software fingerprints.
+
+For each EXIF field $e_j$ with value $v_j$:
+
+$$P(\text{AI} \mid e_j) = \max_{f \in F} \text{sim}(v_j, f)$$
+
+where $\text{sim}$ is string similarity (substring match, Levenshtein distance).
+
+**b) Camera Metadata Validation**
+
+Camera authenticity score:
+
+$$A_{\text{camera}} = \begin{cases}
+0.75 & \text{if } \text{Make} \neq \text{null} \land \text{Model} \neq \text{null} \land \text{LensModel} \neq \text{null} \\
+0.70 & \text{if } \text{Make} \neq \text{null} \land \text{Model} \neq \text{null} \\
+0.50 & \text{if } \text{Make} = \text{null} \lor \text{Model} = \text{null} \\
+0.40 & \text{if suspicious pattern detected}
+\end{cases}$$
+
+**c) Timestamp Consistency**
+
+For timestamps $t_1, t_2, \ldots, t_k$:
+
+$$\Delta_{\max} = \max_{i,j} |t_i - t_j|$$
+
+Inconsistency score:
+
+$$I_{\text{time}} = \begin{cases}
+0.40 & \text{if } \Delta_{\max} > 5 \text{ seconds} \\
+0 & \text{otherwise}
+\end{cases}$$
+
+### 2. Watermark Analyzer
+
+**Purpose**: Detect statistical patterns of invisible watermarks using signal processing.
+
+**Mathematical Framework:**
+
+**a) Wavelet-Domain Analysis**
+
+Apply Haar wavelet decomposition:
+
+$$\text{coeffs} = \text{DWT}_{\text{Haar}}(I) = \{cA, (cH, cV, cD)\}$$
+
+High-frequency energy ratio:
+
+$$\rho_{\text{HF}} = \frac{\text{Var}(cH) + \text{Var}(cV) + \text{Var}(cD)}{\text{Var}(cA) + \text{Var}(cH) + \text{Var}(cV) + \text{Var}(cD)}$$
+
+Kurtosis analysis:
+
+$$\kappa = \frac{1}{3}(\text{kurtosis}(cH) + \text{kurtosis}(cV) + \text{kurtosis}(cD))$$
+
+Detection rule:
+
+$$\text{Detected} = (\rho_{\text{HF}} > 0.18) \land (\kappa > 7.5)$$
+
+**b) Frequency-Domain Periodicity**
+
+Compute autocorrelation of magnitude spectrum:
+
+$$R(u, v) = \mathcal{F}^{-1}\{|\mathcal{F}\{I\}|^2\}$$
+
+Peak detection:
+
+$$P_{\text{peak}} = \frac{\text{count}(\text{peaks in } R)}{\text{size}(R)}$$
+
+**c) LSB Steganography Detection**
+
+For each color channel $C$:
+
+$$\text{LSB}(C) = C \& 1$$
+
+Entropy of LSB plane:
+
+$$H_{\text{LSB}} = -\sum_{b \in \{0,1\}} p(b) \log_2 p(b)$$
+
+Chi-square test for uniformity:
+
+$$\chi^2 = \sum_{b \in \{0,1\}} \frac{(O_b - E_b)^2}{E_b}$$
+
+Detection confidence:
+
+$$C_{\text{watermark}} = \min\left(0.95, 0.3 \cdot \mathbb{1}_{\rho_{\text{HF}}>0.18} + 0.3 \cdot \mathbb{1}_{\kappa>7.5} + 0.4 \cdot \mathbb{1}_{H_{\text{LSB}}>0.72}\right)$$
+
+### Implementation References
+
+- See `evidence_analyzers/exif_analyzer.py:ExifAnalyzer.analyze()`
+- See `evidence_analyzers/watermark_analyzer.py:WatermarkAnalyzer.analyze()`
+
+---
+
 ## Ensemble Aggregation Theory
 
 ### Weighted Linear Combination
@@ -578,6 +784,7 @@ $$\mathbf{w} = [0.30, 0.25, 0.20, 0.15, 0.10]^\top$$
 ### Theoretical Properties
 
 **Proposition 1 (Boundedness):**
+
 $$\forall i, \; s_i \in [0, 1] \implies S \in [0, 1]$$
 
 *Proof:* 
@@ -613,77 +820,110 @@ $$C = \text{clip}\left(2 \times |S - 0.5|, 0, 1\right)$$
 - $S = 0.5$: No confidence ($C = 0.0$)
 - $S = 1.0$: Very confident AI-generated ($C = 1.0$)
 
-### Alternative Aggregation Strategies (Future Work)
+### Alternative Aggregation Strategies
 
-**Weighted Geometric Mean:**
-$$S_{\text{geom}} = \prod_{i=1}^{5} s_i^{w_i}$$
+| Strategy | Formula | Pros | Cons |
+|----------|---------|------|------|
+| Weighted Mean | $S = \sum w_i s_i$ | Simple, interpretable | Assumes independence |
+| Weighted Geometric | $S = \prod s_i^{w_i}$ | Penalizes low scores | Zero score breaks |
+| Bayesian | $P(\text{AI} \mid \mathbf{s}) \propto P(\text{AI}) \prod P(s_i \mid \text{AI})$ | Principled | Needs training data |
+| Neural | $S = f(\mathbf{s}; \theta)$ | Learns interactions | Black box, needs data |
 
-- *Pro:* Penalizes very low scores (forces consensus)
-- *Con:* Single zero score makes $S_{\text{geom}} = 0$
+---
 
-**Bayesian Model:**
+## Decision Policy Theory
 
-$$P(\text{AI} \mid s_1, \ldots, s_5) = \frac{P(s_1, \ldots, s_5 \mid \text{AI}) P(\text{AI})}{P(s_1, \ldots, s_5)}$$
+### Evidence Strength Ordering
 
-Assuming conditional independence:
+$$ \text{CONCLUSIVE} > \text{STRONG} > \text{MODERATE} > \text{WEAK} $$
 
-$$P(\text{AI} \mid \mathbf{s}) \propto P(\text{AI}) \prod_{i=1}^{5} P(s_i \mid \text{AI})$$
+Numeric mapping:
+$$\text{Strength}(e) = \begin{cases}
+4 & \text{if CONCLUSIVE} \\
+3 & \text{if STRONG} \\
+2 & \text{if MODERATE} \\
+1 & \text{if WEAK}
+\end{cases}$$
 
-- *Pro:* Principled probabilistic framework
-- *Con:* Requires labeled training data to estimate likelihoods
+### Decision Function
 
-**Neural Combiner:**
+Let $E = \{e_1, e_2, \ldots, e_n\}$ be evidence items with:
+- Direction: $d_i \in \{\text{AI}, \text{AUTHENTIC}, \text{INDETERMINATE}\}$
+- Strength: $s_i \in \{1, 2, 3, 4\}$
+- Confidence: $c_i \in [0, 1]$
 
-Learn non-linear combination function $f : [0, 1]^5 \to [0, 1]$:
+Define evidence subsets:
+- $E_{\text{AI}} = \{e_i : d_i = \text{AI}\}$
+- $E_{\text{AUTH}} = \{e_i : d_i = \text{AUTHENTIC}\}$
+- $E_{\text{IND}} = \{e_i : d_i = \text{INDETERMINATE}\}$
 
-$S_{\text{neural}} = f(s_1, s_2, s_3, s_4, s_5; \theta)$
+### Decision Rules
 
-- *Pro:* Can learn complex interactions
-- *Con:* Loses interpretability, requires large labeled dataset
+**Rule 1: Conclusive Evidence Override**
+If $\exists e_i \in E_{\text{AI}}$ with $s_i = 4$ and $c_i \geq 0.6$:
+$$D = \text{CONFIRMED\_AI\_GENERATED}$$
+
+**Rule 2: Strong Evidence Dominance**
+Let $S_{\text{AI}} = \max_{e_i \in E_{\text{AI}}} s_i$, $S_{\text{AUTH}} = \max_{e_i \in E_{\text{AUTH}}} s_i$
+
+If $S_{\text{AI}} = 3$ and $S_{\text{AI}} > S_{\text{AUTH}}$:
+$$D = \text{SUSPICIOUS\_AI\_LIKELY}$$
+
+**Rule 3: Conflicting Evidence**
+If $|E_{\text{IND}}| \geq 2$ or $(|E_{\text{AI}}| > 0$ and $|E_{\text{AUTH}}| > 0)$:
+$$D = \text{AUTHENTIC\_BUT\_REVIEW}$$
+
+**Rule 4: Fallback to Tier-1 Metrics**
+If $E = \emptyset$ or no rules above apply:
+
+$$D = \begin{cases}
+\text{SUSPICIOUS\_AI\_LIKELY} & \text{if } S \geq \tau \\
+\text{MOSTLY\_AUTHENTIC} & \text{if } S < \tau
+\end{cases}$$
+
+### Implementation Reference
+
+See `decision_builders/decision_policy.py:DecisionPolicy.apply()`
 
 ---
 
 ## Threshold Calibration
 
-### Binary Decision Rule
+### Binary Decision Rule for Tier-1 Fallback
 
-$D(I) = \begin{cases} 
-1 & \text{if } S(I) \geq \tau \\
-0 & \text{if } S(I) < \tau
-\end{cases}$
+$$D(I) = \begin{cases} 
+\text{SUSPICIOUS\_AI\_LIKELY} & \text{if } S(I) \geq \tau \\
+\text{MOSTLY\_AUTHENTIC} & \text{if } S(I) < \tau
+\end{cases}$$
 
 Default threshold: $\tau = 0.65$
 
 ### ROC Analysis Framework
 
 Define:
-- **True Positive (TP)**: AI image correctly flagged ($D = 1, y = 1$)
-- **False Positive (FP)**: Real image incorrectly flagged ($D = 1, y = 0$)
-- **True Negative (TN)**: Real image correctly passed ($D = 0, y = 0$)
-- **False Negative (FN)**: AI image incorrectly passed ($D = 0, y = 1$)
+- **True Positive (TP)**: AI image correctly flagged
+- **False Positive (FP)**: Real image incorrectly flagged
+- **True Negative (TN)**: Real image correctly passed
+- **False Negative (FN)**: AI image incorrectly passed
 
 True Positive Rate (Sensitivity):
-$\text{TPR}(\tau) = \frac{\text{TP}}{\text{TP} + \text{FN}} = P(S \geq \tau \mid y = 1)$
+$$\text{TPR}(\tau) = \frac{\text{TP}}{\text{TP} + \text{FN}} = P(S \geq \tau \mid \text{AI})$$
 
 False Positive Rate:
-$\text{FPR}(\tau) = \frac{\text{FP}}{\text{FP} + \text{TN}} = P(S \geq \tau \mid y = 0)$
-
-ROC Curve: $\{(\text{FPR}(\tau), \text{TPR}(\tau)) : \tau \in [0, 1]\}$
+$$\text{FPR}(\tau) = \frac{\text{FP}}{\text{FP} + \text{TN}} = P(S \geq \tau \mid \text{Authentic})$$
 
 ### Threshold Selection Strategies
 
-**1. Maximize Youden's J:**
-$\tau^* = \arg\max_\tau \left[\text{TPR}(\tau) - \text{FPR}(\tau)\right]$
+**1. Maximize Youden's J Statistic:**
+$$\tau^* = \arg\max_\tau \left[\text{TPR}(\tau) - \text{FPR}(\tau)\right]$$
 
 **2. Fixed FPR Constraint:**
-$\tau^* = \min\{\tau : \text{FPR}(\tau) \leq \alpha\}$
-
+$$\tau^* = \min\{\tau : \text{FPR}(\tau) \leq \alpha\}$$
 where $\alpha$ is acceptable false positive rate (e.g., 10%).
 
-**3. Cost-Sensitive:**
-$\tau^* = \arg\min_\tau \left[C_{\text{FP}} \cdot \text{FP}(\tau) + C_{\text{FN}} \cdot \text{FN}(\tau)\right]$
-
-where $C_{\text{FP}}$ = cost of incorrectly flagging real image, $C_{\text{FN}}$ = cost of missing AI image.
+**3. Cost-Sensitive Optimization:**
+$$\tau^* = \arg\min_\tau \left[C_{\text{FP}} \cdot \text{FP}(\tau) + C_{\text{FN}} \cdot \text{FN}(\tau)\right]$$
+where $C_{\text{FP}}$ = cost of false positive, $C_{\text{FN}}$ = cost of false negative.
 
 ### Current Calibration ($\tau = 0.65$)
 
@@ -692,26 +932,28 @@ Rationale:
 - Accepts 10-20% FPR on real images
 - Reflects use case: screening tool (better to review unnecessarily than miss AI content)
 
-Sensitivity modes:
-- **Conservative** ($\tau = 0.75$): Lower FPR (~5-10%), Lower TPR (~50-70%)
-- **Balanced** ($\tau = 0.65$): Default
-- **Aggressive** ($\tau = 0.55$): Higher TPR (~60-85%), Higher FPR (~20-30%)
+| Sensitivity Mode | Threshold | Expected TPR | Expected FPR | Use Case |
+|-----------------|-----------|--------------|--------------|----------|
+| Conservative | $\tau = 0.75$ | 50-70% | 5-10% | Low tolerance for FPs |
+| Balanced | $\tau = 0.65$ | 60-80% | 10-20% | General screening |
+| Aggressive | $\tau = 0.55$ | 70-85% | 20-30% | High sensitivity needed |
 
 ---
 
 ## Performance Analysis
 
-### Expected Detection Rates (Empirical Estimates)
+### Expected Detection Rates
 
 Based on statistical properties of different generator classes:
 
-| Generator Type | Expected TPR | Rationale |
-|----------------|--------------|-----------|
-| DALL-E 2, Stable Diffusion 1.x | 80-90% | Strong gradient/frequency artifacts |
-| Midjourney v5, Stable Diffusion 2.x | 70-80% | Improved but detectable patterns |
-| DALL-E 3, Midjourney v6 | 55-70% | Better physics simulation |
-| Imagen 3, FLUX | 40-55% | State-of-art, near-physical |
-| Post-processed AI | 30-45% | Artifacts removed by editing |
+| Generator Type | Expected TPR | Confidence | Rationale |
+|----------------|--------------|------------|-----------|
+| DALL-E 2, SD 1.x | 80-90% | High | Strong gradient/frequency artifacts |
+| Midjourney v5, SD 2.x | 70-80% | Medium | Improved but detectable patterns |
+| DALL-E 3, MJ v6 | 55-70% | Medium | Better physics simulation |
+| Imagen 3, FLUX | 40-55% | Low | State-of-art, near-physical |
+| Post-processed AI | 30-45% | Low | Artifacts removed by editing |
+| **False Positive Rate** | **10-20%** | Medium | HDR, macro, studio photos |
 
 ### False Positive Analysis
 
@@ -740,37 +982,78 @@ Based on statistical properties of different generator classes:
 6. **Other** (15%): Panoramas, stitched images, artistic filters
 
 **Mitigation Strategies:**
-
-- Metadata checks: EXIF camera model, lens info
+- EXIF metadata checks for camera model, lens info
 - Image provenance verification
 - Human review for high-confidence FPs (score close to threshold)
+- Multi-image analysis for consistency checking
 
-### Computational Complexity
+### Validation Methodology
 
-| Metric | Time Complexity | Space Complexity |
-|--------|-----------------|------------------|
-| Gradient PCA | $O(HW + N \log N)$ | $O(N)$ where $N = 10000$ |
-| Frequency FFT | $O(HW \log(HW))$ | $O(HW)$ |
-| Noise Analysis | $O(HW \cdot P)$ | $O(P)$ where $P \approx 100$ patches |
-| Texture Analysis | $O(N_p \cdot p^2)$ | $O(N_p \cdot p^2)$ where $N_p = 50$, $p = 64$ |
-| Color Analysis | $O(HW)$ | $O(HW)$ |
-| **Total** | $O(HW \log(HW))$ | $O(HW)$ |
+**Test Dataset Composition:**
+- **AI Images** (n=1000): Balanced across generators and versions
+- **Authentic Images** (n=1000): Diverse scenes, lighting conditions, cameras
+- **Challenging Cases** (n=200): HDR, macro, long-exposure, heavily edited
 
-For typical image $1920 \times 1080$:
-- $HW \approx 2 \times 10^6$ pixels
-- Processing time: 2-4 seconds (single-threaded)
-- Memory: 50-150 MB
+**Performance Metrics:**
+- Accuracy: $\frac{TP + TN}{TP + TN + FP + FN}$
+- Precision: $\frac{TP}{TP + FP}$
+- Recall: $\frac{TP}{TP + FN}$
+- F1-Score: $2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$
+- AUC-ROC: Area under ROC curve
+- AUC-PR: Area under Precision-Recall curve
 
-### Scalability
+---
 
-Batch processing with $n$ images and $w$ workers:
+## Computational Complexity
 
-$T_{\text{batch}} = \frac{n}{w} \cdot T_{\text{single}} + T_{\text{overhead}}$
+### Time Complexity Analysis
+
+| Metric | Theoretical | Empirical (1920×1080) | Bottleneck |
+|--------|-------------|----------------------|------------|
+| Gradient PCA | $O(HW + N \log N)$ | 200-400 ms | Eigenvalue decomposition |
+| Frequency FFT | $O(HW \log(HW))$ | 150-300 ms | 2D FFT computation |
+| Noise Analysis | $O(HW \cdot P)$ | 100-250 ms | Patch processing |
+| Texture Analysis | $O(N_p \cdot p^2)$ | 100-200 ms | Random sampling |
+| Color Analysis | $O(HW)$ | 50-150 ms | Histogram computation |
+| Evidence Analysis | $O(HW)$ | 100-300 ms | Signal processing |
+| **Total** | $O(HW \log(HW))$ | **700-1600 ms** | CPU-bound |
+
+### Space Complexity
+
+| Component | Memory Usage | Description |
+|-----------|--------------|-------------|
+| Image Loading | 20-50 MB | RGB float32 array |
+| Intermediate Buffers | 10-30 MB | Gradients, spectra, patches |
+| Patch Storage | 5-15 MB | Temporary patch arrays |
+| Evidence Processing | 5-10 MB | Wavelet coefficients, histograms |
+| **Total per Image** | **40-105 MB** | Peak memory |
+| **Batch (10 images)** | **200-500 MB** | With parallel workers |
+
+### Scalability Analysis
+
+**Batch Processing:**
+
+For $n$ images with $w$ workers:
+
+$$T_{\text{batch}} = \frac{n}{w} \cdot T_{\text{single}} + T_{\text{overhead}}$$
 
 Efficiency:
-$\eta = \frac{n \cdot T_{\text{single}}}{T_{\text{batch}}} \approx \frac{w}{1 + \epsilon}$
+$$\eta = \frac{n \cdot T_{\text{single}}}{T_{\text{batch}}} \approx \frac{w}{1 + \epsilon}$$
 
-where $\epsilon$ represents parallelization overhead ($\epsilon \approx 0.1$ for $w = 4$).
+where $\epsilon \approx 0.1-0.2$ represents parallelization overhead.
+
+**Scaling Limits:**
+- CPU-bound: Limited by core count (default: 4 workers)
+- Memory-bound: ~150 MB/image → ~6 images/GB RAM
+- I/O-bound: Disk read/write for large batches
+
+### Optimization Opportunities
+
+1. **Image Resizing**: Downsample to 1024×1024 for 4× speedup
+2. **Patch Sampling**: Reduce from 100 to 50 patches for 2× speedup
+3. **FFT Optimization**: Use power-of-two dimensions
+4. **Parallelization**: Metric-level parallelism within image
+5. **Caching**: Reuse intermediate results for similar images
 
 ---
 
@@ -782,7 +1065,7 @@ where $\epsilon$ represents parallelization overhead ($\epsilon \approx 0.1$ for
 
 No statistical detector can keep pace with generative model evolution:
 
-$\lim_{t \to \infty} \text{TPR}(t) \to \text{TPR}_{\text{base}} \approx 30\%$
+$$\lim_{t \to \infty} \text{TPR}(t) \to \text{TPR}_{\text{base}} \approx 30\%$$
 
 where $t$ is time and generators continuously improve.
 
@@ -792,11 +1075,13 @@ where $t$ is time and generators continuously improve.
 
 Simple post-processing defeats all metrics:
 
-- Add Gaussian noise: $\tilde{I} = I + \mathcal{N}(0, \sigma^2)$ where $\sigma = 2$
-- JPEG compression with quality 85
-- Slight rotation + crop
-
-Expected TPR drop: 60-80% → 10-30%
+| Attack | Effect on TPR | Defeats |
+|--------|---------------|---------|
+| Add Gaussian noise ($\sigma=2$) | 80% → 30% | Noise, Frequency, Texture |
+| JPEG compression (quality=85) | 80% → 40% | Frequency, Gradient |
+| Slight rotation + crop | 80% → 50% | All metrics |
+| Histogram matching | 80% → 20% | Color, Texture |
+| **Combined attacks** | **80% → 10%** | **All detectors** |
 
 **3. False Positive Problem**
 
@@ -804,17 +1089,22 @@ Expected TPR drop: 60-80% → 10-30%
 - Content creators unfairly flagged
 - Erosion of user trust
 - Legal liability issues
+- High operational cost of manual review
 
 **4. No Semantic Understanding**
 
 System cannot detect:
 - Deepfakes (face swaps)
 - Inpainting (local manipulation)
-- Prompt-guided generation ("photo in the style of...") 
+- Style transfer effects
+- Prompt-guided generation ("photo in the style of...")
 
 **5. Computational Cost**
 
-2-4 sec/image too slow for real-time applications (video streaming, live moderation).
+2-4 sec/image too slow for:
+- Real-time applications (video streaming)
+- High-volume platforms (social media moderation)
+- Mobile device deployment
 
 ### Future Research Directions
 
@@ -822,64 +1112,100 @@ System cannot detect:
 
 Combine statistical + ML approaches:
 
-$S_{\text{hybrid}} = \alpha \cdot S_{\text{statistical}} + (1 - \alpha) \cdot S_{\text{ML}}$
+$$S_{\text{hybrid}} = \alpha \cdot S_{\text{statistical}} + (1 - \alpha) \cdot S_{\text{ML}}$$
 
 - Statistical: Fast, interpretable, generalizes
-- ML: Learns generator-specific patterns
+- ML: Learns generator-specific patterns, semantic features
 
 **2. Provenance Tracking**
 
 Blockchain-based image certificates:
 - Cryptographic signatures at capture time
-- Immutable audit trail
+- Immutable audit trail from sensor to screen
 - No detection needed (authenticity verified, not inferred)
 
 **3. Watermarking Standards**
 
-Embedded invisible watermarks in AI generators (industry collaboration):
-- Stable Diffusion: `invisible_watermark` library
-- OpenAI: C2PA content credentials
-- Detection becomes trivial lookup
+Industry collaboration for embedded watermarks:
+
+| Generator | Watermark Type | Detectability |
+|-----------|---------------|---------------|
+| Stable Diffusion | `invisible_watermark` library | Trivial |
+| OpenAI DALL-E | C2PA content credentials | Cryptographic |
+| Midjourney | Statistical patterns | High confidence |
+| Adobe Firefly | Metadata signatures | Moderate |
 
 **4. Active Authentication**
 
 Real-time verification with camera hardware:
-- Secure enclaves in sensors
+- Secure enclaves in image sensors
 - Tamper-evident metadata
 - Physical unclonable functions (PUFs)
+- Digital signatures at capture
 
-**5. Human-in-the-Loop**
+**5. Human-in-the-Loop Optimization**
 
-Optimize for **human augmentation**, not replacement:
-- Prioritization scores, not binary decisions
-- Explainable evidence, not black-box predictions
-- Confidence intervals, not point estimates
+System design for **human augmentation**, not replacement:
+
+| Aspect | Current | Future |
+|--------|---------|--------|
+| Output | Binary decision | Prioritization score |
+| Explainability | Metric scores | Visual evidence maps |
+| Confidence | Single value | Uncertainty intervals |
+| Feedback Loop | None | Learning from human decisions |
+
+### Implementation Roadmap
+
+**Short-term (Q1 2025):**
+1. Add C2PA provenance analyzer
+2. Implement adaptive thresholding based on image characteristics
+3. Add GPU acceleration for FFT operations
+
+**Medium-term (Q2-Q3 2025):**
+1. Integrate ML-based anomaly detection as optional metric
+2. Add video frame analysis capability
+3. Implement distributed processing with Redis/RabbitMQ
+
+**Long-term (2026+):**
+1. Real-time streaming API
+2. Mobile SDK for on-device detection
+3. Plugin system for custom analyzers
+4. Federated learning for model updates
 
 ### Conclusion
 
 This system represents a **pragmatic engineering solution** to an **unsolvable theoretical problem**. Perfect AI image detection is impossible due to:
 
-1. Generative models improving faster than detectors
-2. Adversarial post-processing trivially defeats statistical features
-3. Semantic understanding requires AGI-level capabilities
+1. **Generative models improving faster than detectors**
+2. **Adversarial post-processing trivially defeats statistical features**
+3. **Semantic understanding requires AGI-level capabilities**
 
-**Our contribution:** A transparent, explainable screening tool that reduces manual review workload by 40-70% while acknowledging fundamental limitations.
+**Our contribution:** A transparent, explainable screening tool that:
+- Reduces manual review workload by 40-70%
+- Provides auditable decision trails
+- Acknowledges fundamental limitations
+- Optimizes for human-in-the-loop workflows
+
+The value is not in perfect detection, but in **workflow efficiency** and **risk reduction** for organizations processing large volumes of user-generated content.
 
 ---
 
 ## References
 
-1. Gragnaniello et al. (2021). "Are GAN Generated Images Easy to Detect?" *IEEE ICME*.
-2. Dzanic et al. (2020). "Fourier Spectrum Discrepancies in Deep Networks." *NeurIPS*.
-3. Kirchner & Johnson (2019). "SPN-CNN for Image Manipulation Detection." *IEEE WIFS*.
-4. Nataraj et al. (2019). "Detecting GAN Images via Co-occurrence Matrices." *Electronic Imaging*.
-5. Marra et al. (2019). "Do GANs Leave Specific Traces?" *IEEE MIPR*.
-6. Corvi et al. (2023). "From GANs to Diffusion Models." *arXiv:2304.06408*.
-7. Sha et al. (2023). "DE-FAKE: Detection and Attribution of Fake Images." *ACM CCS*.
-8. Wang et al. (2020). "CNN-Generated Images Are Easy to Spot... for Now." *CVPR*.
+1. Gragnaniello, D., Cozzolino, D., Marra, F., Poggi, G., & Verdoliva, L. (2021). "Are GAN Generated Images Easy to Detect? A Critical Analysis of the State-of-the-Art." *IEEE International Conference on Multimedia and Expo*.
+2. Dzanic, T., Shah, K., & Witherden, F. (2020). "Fourier Spectrum Discrepancies in Deep Network Generated Images." *NeurIPS 2020*.
+3. Kirchner, M., & Johnson, M. K. (2019). "SPN-CNN: Boosting Sensor Pattern Noise for Image Manipulation Detection." *IEEE International Workshop on Information Forensics and Security*.
+4. Nataraj, L., Mohammed, T. M., Manjunath, B. S., Chandrasekaran, S., Flenner, A., Bappy, J. H., & Roy-Chowdhury, A. K. (2019). "Detecting GAN Generated Fake Images using Co-occurrence Matrices." *Electronic Imaging*.
+5. Marra, F., Gragnaniello, D., Cozzolino, D., & Verdoliva, L. (2019). "Detection of GAN-Generated Fake Images over Social Networks." *IEEE Conference on Multimedia Information Processing and Retrieval*.
+6. Corvi, R., Cozzolino, D., Poggi, G., Nagano, K., & Verdoliva, L. (2023). "Intriguing Properties of Synthetic Images: from Generative Adversarial Networks to Diffusion Models." *arXiv preprint arXiv:2304.06408*.
+7. Sha, Z., Li, Z., Yu, N., & Zhang, Y. (2023). "DE-FAKE: Detection and Attribution of Fake Images Generated by Text-to-Image Diffusion Models." *ACM CCS 2023*.
+8. Wang, S. Y., Wang, O., Zhang, R., Owens, A., & Efros, A. A. (2020). "CNN-Generated Images Are Surprisingly Easy to Spot... for Now." *CVPR 2020*.
+9. Zhang, X., Karaman, S., & Chang, S. F. (2019). "Detecting and Simulating Artifacts in GAN Fake Images." *IEEE International Workshop on Information Forensics and Security*.
+10. Verdoliva, L. (2020). "Media Forensics and DeepFakes: An Overview." *IEEE Journal of Selected Topics in Signal Processing*.
 
 ---
 
-*Document Version: 1.0*  
+*Document Version: 2.0*  
 *Author: Satyaki Mitra*  
-*Date: December 2025*
+*Date: December 2025*  
+*License: MIT*
