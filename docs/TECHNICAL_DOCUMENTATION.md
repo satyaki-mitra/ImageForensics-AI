@@ -750,7 +750,8 @@ Peak detection:
 
 $$P_{\text{peak}} = \frac{\text{count}(\text{peaks in } R)}{\text{size}(R)}$$
 
-**c) LSB Steganography Detection
+
+**c) LSB Steganography Detection**
 
 For each color channel $C$:
 
