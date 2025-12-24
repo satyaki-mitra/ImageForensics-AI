@@ -111,7 +111,7 @@ flowchart TD
     subgraph Decision [Decision Policy Engine]
         Rule1[Rule 1: Conclusive evidence<br/>overrides all]
         Rule2[Rule 2: Strong evidence ><br/>statistical metrics]
-        Rule3[Rule 3: Conflicting evidence →<br/>"Review Required"]
+        Rule3[Rule 3: Conflicting evidence → Review Required]
         Rule4[Rule 4: No evidence →<br/>fallback to Tier 1]
     end
     
