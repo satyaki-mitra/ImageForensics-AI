@@ -2,7 +2,7 @@
 
 **Author**: Satyaki Mitra  
 **Date**: December 2025  
-**Version**: 2.0
+**Version**: 1.0
 
 ---
 
@@ -56,8 +56,9 @@ This document provides the mathematical, statistical, and architectural foundati
 | $S \in [0, 1]$ | Aggregated ensemble score |
 | $\tau$ | Decision threshold |
 | $E = \{e_1, e_2, \ldots, e_n\}$ | Evidence items |
-| $d_i \in \{AI, AUTHENTIC, INDETERMINATE\}$ | Evidence direction |
-| $D \in \{\text{CONFIRMED\_AI}, \text{SUSPICIOUS\_AI}, \text{AUTHENTIC\_BUT\_REVIEW}, \text{MOSTLY\_AUTHENTIC}\}$ | Final decision |
+| $d_i \in \{\text{AI}, \text{AUTHENTIC}, \text{INDETERMINATE}\}$ | Evidence direction |
+| $D \in \{\text{CONFIRMED}\_\text{AI}, \text{SUSPICIOUS}\_\text{AI}, \text{AUTHENTIC}\_\text{BUT}\_\text{REVIEW}, \text{MOSTLY}\_\text{AUTHENTIC}\}$ | Final decision |
+
 
 ### Objective
 
@@ -1205,7 +1206,7 @@ The value is not in perfect detection, but in **workflow efficiency** and **risk
 
 ---
 
-*Document Version: 2.0*  
+*Document Version: 1.0*  
 *Author: Satyaki Mitra*  
 *Date: December 2025*  
 *License: MIT*
