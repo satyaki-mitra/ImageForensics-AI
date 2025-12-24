@@ -8,7 +8,7 @@ app_port: 7860
 license: mit
 ---
 
-<p align="center"> 
+<div align="center">
 
 # ImageForensics-AI
 
@@ -27,7 +27,7 @@ license: mit
 
 > **A transparent, multi-tier evidence-first screening system for identifying images requiring human review in production workflows**
 
-</p>
+</div>
 
 ---
 
@@ -44,7 +44,7 @@ license: mit
 
 ## 🎯 Overview
 
-**ImageForensics-AI** is a **tiered evidence-first screening tool** designed to reduce manual review workload by analyzing images through statistical metrics (Tier-1) and declarative evidence (Tier-2), then resolving through a deterministic decision policy.
+**ImageForensics-AI** is a **Two-Tiered evidence-first screening tool** designed to reduce manual review workload by analyzing images through statistical metrics (Tier-1) and declarative evidence (Tier-2), then resolving through a deterministic decision policy.
 
 ### What This Is
 ✅ A workflow efficiency tool with evidence-first architecture  
@@ -171,7 +171,7 @@ flowchart TD
     Input[📁 Input: Image File<br/>Validated by ImageValidator]
     
     %% Tier 1: Statistical Metrics (Actual Components)
-    subgraph T1 [Tier 1: Statistical Metrics (metrics/)]
+    subgraph T1 [Tier 1: Statistical Metrics - metrics/]
         G[metrics/gradient_field_pca.py]
         F[metrics/frequency_analyzer.py]
         N[metrics/noise_analyzer.py]
@@ -184,7 +184,7 @@ flowchart TD
     Status{LIKELY_AUTHENTIC<br/>or REVIEW_REQUIRED}
     
     %% Tier 2: Declarative Evidence (Actual Components)
-    subgraph T2 [Tier 2: Declarative Evidence (evidence_analyzers/)]
+    subgraph T2 [Tier 2: Declarative Evidence - evidence_analyzers/]
         EX[evidence_analyzers/exif_analyzer.py]
         WM[evidence_analyzers/watermark_analyzer.py]
         EA[evidence_analyzers/evidence_aggregator.py]
@@ -570,11 +570,13 @@ Data Scientist | AI-ML Practitioner
 
 ---
 
-<p align="center"> 
+<div align="center">
+
 <i>Built with transparency and evidence-first principles.</i>
 <br>
 <i>Screening, not certainty. Evidence, not guesswork.</i> 
-</p> 
+
+</div> 
 
 
 
