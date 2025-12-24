@@ -46,6 +46,11 @@ This document provides the mathematical, statistical, and architectural foundati
 
 ### Notation
 
+## Problem Formulation
+
+### Notation
+
+```markdown
 | Symbol | Definition |
 |--------|------------|
 | $I \in \mathbb{R}^{H \times W \times 3}$ | RGB input image |
@@ -57,8 +62,8 @@ This document provides the mathematical, statistical, and architectural foundati
 | $\tau$ | Decision threshold |
 | $E = \{e_1, e_2, \ldots, e_n\}$ | Evidence items |
 | $d_i \in \{\text{AI}, \text{AUTHENTIC}, \text{INDETERMINATE}\}$ | Evidence direction |
-| $D \in \{\text{CONFIRMED}\_\text{AI}, \text{SUSPICIOUS}\_\text{AI}, \text{AUTHENTIC}\_\text{BUT}\_\text{REVIEW}, \text{MOSTLY}\_\text{AUTHENTIC}\}$ | Final decision |
-
+| $D \in \{\text{CONFIRMED\_AI}, \text{SUSPICIOUS\_AI}, \text{AUTHENTIC\_BUT\_REVIEW}, \text{MOSTLY\_AUTHENTIC}\}$ | Final decision |
+```
 
 ### Objective
 
