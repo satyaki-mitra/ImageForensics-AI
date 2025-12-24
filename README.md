@@ -240,7 +240,7 @@ Let $I(x,y)$ be the luminance channel:
 
 For each color channel $C$:
 
-$$\text{LSB}(C) = C \ \&\ 1$$
+$$\text{LSB}(C) = C \wedge 1$$
 
 
 **Statistical test**:
