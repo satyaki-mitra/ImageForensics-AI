@@ -236,7 +236,7 @@ Let $I(x,y)$ be the luminance channel:
    
    where $R_c$ is the cutoff radius
 
-#### c) LSB Steganography Detection
+#### **c) LSB Steganography Detection**
 
 For each color channel $C$:
 
