@@ -106,17 +106,17 @@ flowchart TD
     EvidenceE[Evidence E]
     
     subgraph Decision[DECISION POLICY ENGINE]
-        Rule1[1. Conclusive evidence overrides all]
-        Rule2[2. Strong evidence > statistical metrics]
-        Rule3[3. Conflicting evidence → "AUTHENTIC_BUT_REVIEW"]
-        Rule4[4. No evidence → fallback to Tier-1 metrics]
+        Rule1["1. Conclusive evidence overrides all"]
+        Rule2["2. Strong evidence > statistical metrics"]
+        Rule3["3. Conflicting evidence → 'AUTHENTIC_BUT_REVIEW'"]
+        Rule4["4. No evidence → fallback to Tier-1 metrics"]
     end
     
     subgraph Final[FINAL DECISION]
-        Final1[• CONFIRMED_AI_GENERATED<br/>conclusive evidence]
-        Final2[• SUSPICIOUS_AI_LIKELY<br/>strong evidence/metrics]
-        Final3[• AUTHENTIC_BUT_REVIEW<br/>conflicting/weak evidence]
-        Final4[• MOSTLY_AUTHENTIC<br/>strong authentic evidence]
+        Final1["• CONFIRMED_AI_GENERATED<br/>conclusive evidence"]
+        Final2["• SUSPICIOUS_AI_LIKELY<br/>strong evidence/metrics"]
+        Final3["• AUTHENTIC_BUT_REVIEW<br/>conflicting/weak evidence"]
+        Final4["• MOSTLY_AUTHENTIC<br/>strong authentic evidence"]
     end
     
     Input --> Tier1
