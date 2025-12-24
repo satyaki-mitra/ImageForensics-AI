@@ -32,18 +32,18 @@ license: mit
 ---
 
 ## 📖 Table of Contents
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Architecture Overview](#-architecture-overview)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Documentation](#-documentation)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Architecture Overview](#architecture-overview)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
 - [Technical Details](#technical-details)
 - [API Documentation](#api-documentation)
-- [System Architecture](#-system-architecture)
-- [Performance](#performance--accuracy)
-- [Ethical Considerations](#-ethical-considerations--limitations)
-- [License](#-license)
+- [System Architecture](#system-architecture)
+- [Performance & Accuracy](#performance--accuracy)
+- [Ethical Considerations & Limitations](#ethical-considerations--limitations)
+- [License](#license)
 
 ---
 
