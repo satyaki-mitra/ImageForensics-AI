@@ -50,7 +50,6 @@ This document provides the mathematical, statistical, and architectural foundati
 
 ### Notation
 
-```markdown
 | Symbol | Definition |
 |--------|------------|
 | $I \in \mathbb{R}^{H \times W \times 3}$ | RGB input image |
@@ -63,7 +62,7 @@ This document provides the mathematical, statistical, and architectural foundati
 | $E = \{e_1, e_2, \ldots, e_n\}$ | Evidence items |
 | $d_i \in \{\text{AI}, \text{AUTHENTIC}, \text{INDETERMINATE}\}$ | Evidence direction |
 | $D \in \{\text{CONFIRMED\_AI}, \text{SUSPICIOUS\_AI}, \text{AUTHENTIC\_BUT\_REVIEW}, \text{MOSTLY\_AUTHENTIC}\}$ | Final decision |
-```
+
 
 ### Objective
 
